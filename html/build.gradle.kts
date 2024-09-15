@@ -122,6 +122,7 @@ dependencies {
     sources(libs.tommyettinger.jdkgdxds)
     sources(libs.tommyettinger.regexodus)
     sources(libs.tommyettinger.textratypist)
+    sources(libs.earlgray.shapedrawer)
 }
 
 fun DependencyHandlerScope.sources(
