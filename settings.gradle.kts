@@ -10,8 +10,6 @@ pluginManagement {
 include(":desktop")
 include(":core")
 include(":html")
-include(":gdx-json-parser")
-include(":gdx-ldtk-loader")
 
 dependencyResolutionManagement {
     versionCatalogs { create("libs") }

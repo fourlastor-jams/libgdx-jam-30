@@ -52,7 +52,6 @@ tasks {
 }
 
 dependencies {
-    implementation(project(":gdx-ldtk-loader"))
     implementation(libs.harlequin.core)
     implementation(libs.harlequin.ashley)
     implementation(libs.perceptual)
