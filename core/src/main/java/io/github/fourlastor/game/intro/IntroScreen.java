@@ -2,8 +2,10 @@ package io.github.fourlastor.game.intro;
 
 import static io.github.fourlastor.game.di.modules.AssetsModule.WHITE_PIXEL;
 
+import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -11,6 +13,7 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import io.github.fourlastor.game.intro.ui.Palette;
 import javax.inject.Inject;
 import javax.inject.Named;
 import space.earlygrey.shapedrawer.ShapeDrawer;
@@ -19,25 +22,33 @@ import space.earlygrey.shapedrawer.scene2d.ShapeDrawerDrawable;
 public class IntroScreen extends ScreenAdapter {
 
     private static final Color CLEAR_COLOR = new Color(0x222222ff);
-    private static final int TILE_SIZE = 32;
-    private static final int TILE_COUNT = 10;
 
     private final Stage stage;
     private final Viewport viewport;
+    private final InputMultiplexer multiplexer;
 
     @Inject
-    public IntroScreen(@Named(WHITE_PIXEL) TextureRegion whitePixel) {
-        viewport = new FitViewport(TILE_SIZE * TILE_COUNT, TILE_SIZE * (TILE_COUNT + 3));
+    public IntroScreen(@Named(WHITE_PIXEL) TextureRegion whitePixel, TextureAtlas atlas, InputMultiplexer multiplexer) {
+        this.multiplexer = multiplexer;
+        viewport = new FitViewport(Config.TILE_SIZE * Config.TILE_COUNT, Config.TILE_SIZE * (Config.TILE_COUNT + 3));
         stage = new Stage(viewport);
         ShapeDrawer shapeDrawer = new ShapeDrawer(stage.getBatch(), whitePixel);
         Image bg = new Image(whitePixel);
         bg.setSize(stage.getWidth(), stage.getHeight());
         bg.setColor(new Color(0x333333ff));
         stage.addActor(bg);
+        Image image = createGrid(shapeDrawer);
+        image.setPosition(stage.getWidth() / 2, 0, Align.center | Align.bottom);
+        stage.addActor(image);
+        TextureAtlas.AtlasRegion element = atlas.findRegion("elements/element");
+        stage.addActor(new Palette(element));
+    }
+
+    private static Image createGrid(ShapeDrawer shapeDrawer) {
         Image image = new Image(new ShapeDrawerDrawable(shapeDrawer) {
             @Override
             public void drawShapes(ShapeDrawer shapeDrawer, float x, float y, float width, float height) {
-                int count = TILE_COUNT;
+                int count = Config.TILE_COUNT;
                 float squareWidth = width / count;
                 float squareHeight = height / count;
                 boolean dark = true;
@@ -53,9 +64,8 @@ public class IntroScreen extends ScreenAdapter {
                 }
             }
         });
-        image.setSize(TILE_SIZE * TILE_COUNT, TILE_SIZE * TILE_COUNT);
-        image.setPosition(stage.getWidth() / 2, 0, Align.center | Align.bottom);
-        stage.addActor(image);
+        image.setSize(Config.TILE_SIZE * Config.TILE_COUNT, Config.TILE_SIZE * Config.TILE_COUNT);
+        return image;
     }
 
     @Override
@@ -64,9 +74,21 @@ public class IntroScreen extends ScreenAdapter {
     }
 
     @Override
+    public void show() {
+        super.show();
+        multiplexer.addProcessor(stage);
+    }
+
+    @Override
     public void render(float delta) {
         ScreenUtils.clear(CLEAR_COLOR, true);
         stage.act(delta);
         stage.draw();
+    }
+
+    @Override
+    public void hide() {
+        multiplexer.removeProcessor(stage);
+        super.hide();
     }
 }
