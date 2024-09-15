@@ -1,5 +1,7 @@
 package io.github.fourlastor.game.intro;
 
+import static io.github.fourlastor.game.di.modules.AssetsModule.WHITE_PIXEL;
+
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -9,13 +11,10 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import space.earlygrey.shapedrawer.ShapeDrawer;
-import space.earlygrey.shapedrawer.scene2d.ShapeDrawerDrawable;
-
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import static io.github.fourlastor.game.di.modules.AssetsModule.WHITE_PIXEL;
+import space.earlygrey.shapedrawer.ShapeDrawer;
+import space.earlygrey.shapedrawer.scene2d.ShapeDrawerDrawable;
 
 public class IntroScreen extends ScreenAdapter {
 
