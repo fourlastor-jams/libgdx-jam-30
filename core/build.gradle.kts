@@ -52,6 +52,8 @@ tasks {
 }
 
 dependencies {
+    compileOnly(libs.autovalue.annotations)
+    annotationProcessor(libs.autovalue.processor)
     implementation(libs.harlequin.core)
     implementation(libs.harlequin.ashley)
     implementation(libs.perceptual)
