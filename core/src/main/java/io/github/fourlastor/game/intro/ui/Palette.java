@@ -7,6 +7,7 @@ import com.badlogic.gdx.ai.fsm.DefaultStateMachine;
 import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
@@ -15,6 +16,7 @@ import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import io.github.fourlastor.game.intro.Config;
+import io.github.fourlastor.game.intro.state.ElementType;
 
 public class Palette extends WidgetGroup {
 
@@ -24,15 +26,17 @@ public class Palette extends WidgetGroup {
     private final Image airButton;
     private final Image elementPreview;
     private final StateMachine stateMachine;
+    private final Listener listener;
 
-    public Palette(TextureRegion element) {
+    public Palette(TextureRegion element, Listener listener) {
+        this.listener = listener;
         setFillParent(true);
         Table table = new Table();
         table.setFillParent(true);
-        fireButton = createButton(element, Color.CORAL);
-        waterButton = createButton(element, Color.CYAN);
-        earthButton = createButton(element, Color.BROWN);
-        airButton = createButton(element, Color.WHITE);
+        fireButton = createButton(element, ElementType.FIRE);
+        waterButton = createButton(element, ElementType.WATER);
+        earthButton = createButton(element, ElementType.EARTH);
+        airButton = createButton(element, ElementType.AIR);
         table.padTop(15);
         table.add(fireButton).expand().top();
         table.add(waterButton).expand().top();
@@ -46,10 +50,10 @@ public class Palette extends WidgetGroup {
         stateMachine.changeState(new Selection());
     }
 
-    private Image createButton(TextureRegion element, Color color) {
+    private Image createButton(TextureRegion element, ElementType type) {
         final Image button;
         button = new Image(element);
-        button.setColor(color);
+        button.setColor(type.color);
         return button;
     }
 
@@ -79,21 +83,21 @@ public class Palette extends WidgetGroup {
 
         @Override
         public void enter(Palette palette) {
-            fireListener = createListener(palette, Color.CORAL);
+            fireListener = createListener(palette, ElementType.FIRE);
             palette.fireButton.addListener(fireListener);
-            waterListener = createListener(palette, Color.CYAN);
+            waterListener = createListener(palette, ElementType.WATER);
             palette.waterButton.addListener(waterListener);
-            earthListener = createListener(palette, Color.BROWN);
+            earthListener = createListener(palette, ElementType.EARTH);
             palette.earthButton.addListener(earthListener);
-            airListener = createListener(palette, Color.WHITE);
+            airListener = createListener(palette, ElementType.AIR);
             palette.airButton.addListener(airListener);
         }
 
-        private ClickListener createListener(Palette palette, final Color color) {
+        private ClickListener createListener(Palette palette, final ElementType type) {
             return new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
-                    palette.stateMachine.changeState(new PlaceElement(color));
+                    palette.stateMachine.changeState(new PlaceElement(type));
                 }
             };
         }
@@ -111,11 +115,13 @@ public class Palette extends WidgetGroup {
 
         private final Vector2 screenCoords = new Vector2();
         private final Color color;
+        private final ElementType type;
         private ClickListener listener;
 
-        public PlaceElement(Color color) {
+        public PlaceElement(ElementType type) {
             super();
-            this.color = new Color(color);
+            this.type = type;
+            this.color = new Color(type.color);
             this.color.a = 0.5f;
         }
 
@@ -128,24 +134,29 @@ public class Palette extends WidgetGroup {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
                     palette.stateMachine.changeState(new Selection());
+                    Vector2 positionOnBoard = positionOnBoard(palette);
+                    palette.listener.onElementPlaced(
+                            type, new GridPoint2((int) positionOnBoard.x, (int) positionOnBoard.y));
                 }
             };
             palette.addListener(listener);
         }
 
-        @Override
-        public void update(Palette palette) {
+        public Vector2 positionOnBoard(Palette palette) {
             int x = Gdx.input.getX();
             int y = Gdx.input.getY();
             Vector2 unprojected = palette.getStage()
                     .getViewport()
                     .unproject(screenCoords.set(x, y))
                     .scl(1f / TILE_SIZE);
-            unprojected
-                    .set(
-                            MathUtils.clamp(MathUtils.floor(unprojected.x), 0f, Config.TILE_COUNT - 1),
-                            MathUtils.clamp(MathUtils.floor(unprojected.y), 0, Config.TILE_COUNT - 1))
-                    .scl(TILE_SIZE);
+            return unprojected.set(
+                    MathUtils.clamp(MathUtils.floor(unprojected.x), 0f, Config.TILE_COUNT - 1),
+                    MathUtils.clamp(MathUtils.floor(unprojected.y), 0, Config.TILE_COUNT - 1));
+        }
+
+        @Override
+        public void update(Palette palette) {
+            Vector2 unprojected = positionOnBoard(palette).scl(TILE_SIZE);
             palette.elementPreview.setPosition(unprojected.x, unprojected.y);
         }
 
@@ -160,5 +171,9 @@ public class Palette extends WidgetGroup {
         public StateMachine(Palette owner) {
             super(owner);
         }
+    }
+
+    public interface Listener {
+        void onElementPlaced(ElementType type, GridPoint2 position);
     }
 }

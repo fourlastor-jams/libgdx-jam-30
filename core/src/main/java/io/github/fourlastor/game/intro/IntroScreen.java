@@ -13,7 +13,10 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import io.github.fourlastor.game.intro.state.State;
+import io.github.fourlastor.game.intro.ui.Board;
 import io.github.fourlastor.game.intro.ui.Palette;
+import io.github.fourlastor.game.state.StateContainer;
 import javax.inject.Inject;
 import javax.inject.Named;
 import space.earlygrey.shapedrawer.ShapeDrawer;
@@ -26,6 +29,7 @@ public class IntroScreen extends ScreenAdapter {
     private final Stage stage;
     private final Viewport viewport;
     private final InputMultiplexer multiplexer;
+    private final StateContainer<State> stateContainer = new StateContainer<>(State.initial());
 
     @Inject
     public IntroScreen(@Named(WHITE_PIXEL) TextureRegion whitePixel, TextureAtlas atlas, InputMultiplexer multiplexer) {
@@ -41,7 +45,11 @@ public class IntroScreen extends ScreenAdapter {
         image.setPosition(stage.getWidth() / 2, 0, Align.center | Align.bottom);
         stage.addActor(image);
         TextureAtlas.AtlasRegion element = atlas.findRegion("elements/element");
-        stage.addActor(new Palette(element));
+        TextureAtlas.AtlasRegion tile = atlas.findRegion("elements/tile");
+        Board board = new Board(element, tile);
+        stage.addActor(board);
+        stage.addActor(new Palette(element, (type, position) -> stateContainer.update(it -> it.add(type, position))));
+        stateContainer.listen(board::update);
     }
 
     private static Image createGrid(ShapeDrawer shapeDrawer) {
