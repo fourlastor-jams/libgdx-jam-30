@@ -2,20 +2,17 @@ package io.github.fourlastor.game.intro.ui;
 
 import static io.github.fourlastor.game.intro.Config.TILE_SIZE;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.fsm.DefaultStateMachine;
 import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.GridPoint2;
-import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
-import io.github.fourlastor.game.intro.Config;
 import io.github.fourlastor.game.intro.state.ElementType;
 
 public class Palette extends WidgetGroup {
@@ -134,7 +131,8 @@ public class Palette extends WidgetGroup {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
                     palette.stateMachine.changeState(new Selection());
-                    Vector2 positionOnBoard = positionOnBoard(palette);
+                    Vector2 positionOnBoard =
+                            ElementPosition.positionOnBoard(palette.getStage().getViewport(), screenCoords);
                     palette.listener.onElementPlaced(
                             type, new GridPoint2((int) positionOnBoard.x, (int) positionOnBoard.y));
                 }
@@ -142,21 +140,11 @@ public class Palette extends WidgetGroup {
             palette.addListener(listener);
         }
 
-        public Vector2 positionOnBoard(Palette palette) {
-            int x = Gdx.input.getX();
-            int y = Gdx.input.getY();
-            Vector2 unprojected = palette.getStage()
-                    .getViewport()
-                    .unproject(screenCoords.set(x, y))
-                    .scl(1f / TILE_SIZE);
-            return unprojected.set(
-                    MathUtils.clamp(MathUtils.floor(unprojected.x), 0f, Config.TILE_COUNT - 1),
-                    MathUtils.clamp(MathUtils.floor(unprojected.y), 0, Config.TILE_COUNT - 1));
-        }
-
         @Override
         public void update(Palette palette) {
-            Vector2 unprojected = positionOnBoard(palette).scl(TILE_SIZE);
+            Vector2 unprojected = ElementPosition.positionOnBoard(
+                            palette.getStage().getViewport(), screenCoords)
+                    .scl(TILE_SIZE);
             palette.elementPreview.setPosition(unprojected.x, unprojected.y);
         }
 
