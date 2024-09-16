@@ -1,8 +1,8 @@
 [versions]
 ashley = "1.7.4"
+autovalue = "1.11.0"
 controllers = "2.2.1"
 dagger = "2.49"
-download-plugin = "5.3.0"
 javax = "1"
 gdx = "1.12.0"
 gdxAi = "1.8.2"
@@ -23,6 +23,8 @@ tommyettinger-regexodus = "0.1.15"
 tommyettinger-textratypist = "0.10.0"
 [libraries]
 ashley = { module = "com.badlogicgames.ashley:ashley", version.ref = "ashley" }
+autovalue-annotations = { module = "com.google.auto.value:auto-value-annotations", version.ref = "autovalue" }
+autovalue-processor = { module = "com.google.auto.value:auto-value", version.ref = "autovalue" }
 dagger-core = { module = "com.google.dagger:dagger", version.ref = "dagger"}
 dagger-compiler = { module = "com.google.dagger:dagger-compiler", version.ref = "dagger"}
 dagger-gwt = { module = "com.google.dagger:dagger-gwt", version.ref = "dagger"}
