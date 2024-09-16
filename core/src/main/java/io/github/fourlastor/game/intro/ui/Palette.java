@@ -115,7 +115,8 @@ public class Palette extends WidgetGroup {
 
         public PlaceElement(Color color) {
             super();
-            this.color = color;
+            this.color = new Color(color);
+            this.color.a = 0.5f;
         }
 
         @Override
