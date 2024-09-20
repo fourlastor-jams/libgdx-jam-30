@@ -46,7 +46,8 @@ public class IntroScreen extends ScreenAdapter {
         stage.addActor(image);
         TextureAtlas.AtlasRegion element = atlas.findRegion("elements/element");
         TextureAtlas.AtlasRegion tile = atlas.findRegion("elements/tile");
-        Board board = new Board(element, tile);
+        Board board =
+                new Board(element, tile, ((type, position) -> stateContainer.update(it -> it.add(type, position))));
         stage.addActor(board);
         stage.addActor(new Palette(element, (type, position) -> stateContainer.update(it -> it.add(type, position))));
         stateContainer.listen(board::update);

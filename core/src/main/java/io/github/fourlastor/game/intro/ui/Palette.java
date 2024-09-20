@@ -9,6 +9,7 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup;
@@ -80,6 +81,7 @@ public class Palette extends WidgetGroup {
 
         @Override
         public void enter(Palette palette) {
+            palette.setTouchable(Touchable.childrenOnly);
             fireListener = createListener(palette, ElementType.FIRE);
             palette.fireButton.addListener(fireListener);
             waterListener = createListener(palette, ElementType.WATER);
@@ -124,6 +126,7 @@ public class Palette extends WidgetGroup {
 
         @Override
         public void enter(Palette palette) {
+            palette.setTouchable(Touchable.enabled);
             Image elementPreview = palette.elementPreview;
             elementPreview.setColor(color);
             elementPreview.setVisible(true);
