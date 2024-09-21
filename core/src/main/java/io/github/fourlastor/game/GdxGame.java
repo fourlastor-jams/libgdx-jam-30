@@ -8,7 +8,6 @@ import com.badlogic.gdx.Screen;
 import com.github.tommyettinger.ds.ObjectList;
 import io.github.fourlastor.game.di.GameComponent;
 import io.github.fourlastor.game.intro.IntroComponent;
-import io.github.fourlastor.game.level.di.LevelComponent;
 import io.github.fourlastor.game.route.Router;
 import io.github.fourlastor.harlequin.Harlequin;
 import java.util.List;
@@ -20,17 +19,14 @@ public class GdxGame extends Game implements Router {
 
     private final InputMultiplexer multiplexer;
 
-    private final LevelComponent.Builder levelScreenFactory;
     private final IntroComponent.Builder introScreenFactory;
     private Screen pendingScreen = null;
 
     @Inject
     public GdxGame(
             InputMultiplexer multiplexer,
-            LevelComponent.Builder levelScreenFactory,
             IntroComponent.Builder introScreenFactory) {
         this.multiplexer = multiplexer;
-        this.levelScreenFactory = levelScreenFactory;
         this.introScreenFactory = introScreenFactory;
         Harlequin.LIST_CREATOR = new Harlequin.ListCreator() {
             @Override
@@ -75,10 +71,5 @@ public class GdxGame extends Game implements Router {
     @Override
     public void goToIntro() {
         pendingScreen = introScreenFactory.router(this).build().screen();
-    }
-
-    @Override
-    public void goToLevel() {
-        pendingScreen = levelScreenFactory.router(this).build().screen();
     }
 }
