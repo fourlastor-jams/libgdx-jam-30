@@ -62,10 +62,7 @@ public abstract class State {
     }
 
     public boolean gameWon() {
-        return fireComplete()
-                && waterComplete()
-                && earthComplete()
-                && airComplete();
+        return fireComplete() && waterComplete() && earthComplete() && airComplete();
     }
 
     public boolean fireComplete() {
@@ -129,6 +126,68 @@ public abstract class State {
                 && !airStart().position().equals(candidate)
                 && !airEnd().position().equals(candidate)
                 && !tiles().containsKey(candidate);
+    }
+
+    public State remove(GridPoint2 position) {
+        Tile tile = tiles().get(position);
+        if (tile == null) {
+            return this;
+        }
+        GridPoint2 adjPosition = position.cpy();
+        ElementType type = tile.type();
+        Tile candidate = adj(adjPosition.set(position.x, position.y - 1), type);
+        HashMap<GridPoint2, Tile> newTiles = new HashMap<>(tiles());
+        newTiles.remove(position);
+        Builder builder = builder().tiles(newTiles);
+        if (candidate != null) {
+            return updateLastPosition(type, adjPosition, builder);
+        }
+        candidate = adj(adjPosition.set(position.x, position.y + 1), type);
+        if (candidate != null) {
+            return updateLastPosition(type, adjPosition, builder);
+        }
+        candidate = adj(adjPosition.set(position.x - 1, position.y), type);
+        if (candidate != null) {
+            return updateLastPosition(type, adjPosition, builder);
+        }
+        candidate = adj(adjPosition.set(position.x + 1, position.y), type);
+        if (candidate != null) {
+            return updateLastPosition(type, adjPosition, builder);
+        }
+        switch (type) {
+            case FIRE:
+                return builder.fireLast(fireEnd().position()).build();
+            case WATER:
+                return builder.waterLast(waterEnd().position()).build();
+            case EARTH:
+                return builder.earthLast(earthEnd().position()).build();
+            case AIR:
+                return builder.airLast(airEnd().position()).build();
+        }
+        return this;
+    }
+
+    private State updateLastPosition(ElementType type, GridPoint2 adjPosition, State.Builder builder) {
+        switch (type) {
+            case FIRE:
+                return builder.fireLast(adjPosition).build();
+            case WATER:
+                return builder.waterLast(adjPosition).build();
+            case EARTH:
+                return builder.earthLast(adjPosition).build();
+            case AIR:
+                return builder.airLast(adjPosition).build();
+            default:
+                throw new IllegalStateException("Invalid tile type");
+        }
+    }
+
+    private Tile adj(GridPoint2 adjPosition, ElementType type) {
+        Tile candidate = tiles().get(adjPosition);
+        if (candidate == null || !candidate.type().equals(type)) {
+            return null;
+        }
+        return candidate;
     }
 
     public State add(ElementType type, GridPoint2 position) {

@@ -16,6 +16,7 @@ import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import io.github.fourlastor.game.intro.state.ElementType;
 import io.github.fourlastor.game.intro.state.State;
 import io.github.fourlastor.game.intro.ui.Board;
 import io.github.fourlastor.game.route.Router;
@@ -72,8 +73,17 @@ public class IntroScreen extends ScreenAdapter {
                 atlas.findRegion("elements/air-element"),
                 atlas.findRegion("elements/air-tile"));
         TextureAtlas.AtlasRegion tile = atlas.findRegion("elements/tile");
-        Board board = new Board(
-                elementTextures, tile, ((type, position) -> stateContainer.update(it -> it.add(type, position))));
+        Board board = new Board(elementTextures, tile, new Board.Listener() {
+            @Override
+            public void onElementPlaced(ElementType type, GridPoint2 position) {
+                stateContainer.update(it -> it.add(type, position));
+            }
+
+            @Override
+            public void onElementRemoved(GridPoint2 position) {
+                stateContainer.update(it -> it.remove(position));
+            }
+        });
         stage.addActor(board);
         stateContainer.listen(board::update);
         stateContainer.distinct(State::gameWon).listen(state -> {

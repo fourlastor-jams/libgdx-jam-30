@@ -2,7 +2,6 @@ package io.github.fourlastor.game.intro.ui;
 
 import static io.github.fourlastor.game.intro.Config.TILE_SIZE;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ai.fsm.DefaultStateMachine;
 import com.badlogic.gdx.ai.msg.Telegram;
@@ -98,12 +97,24 @@ public class Board extends WidgetGroup {
         airCurrent.clearActions();
         updateElement(state.fireStart(), fireStart);
         updateElement(state.fireEnd(), fireEnd);
+        if (state.fireEnd().position().equals(state.fireLast())) {
+            fireCurrent = fireEnd;
+        }
         updateElement(state.waterStart(), waterStart);
         updateElement(state.waterEnd(), waterEnd);
+        if (state.waterEnd().position().equals(state.waterLast())) {
+            waterCurrent = waterEnd;
+        }
         updateElement(state.earthStart(), earthStart);
         updateElement(state.earthEnd(), earthEnd);
+        if (state.earthEnd().position().equals(state.earthLast())) {
+            earthCurrent = earthEnd;
+        }
         updateElement(state.airStart(), airStart);
         updateElement(state.airEnd(), airEnd);
+        if (state.airEnd().position().equals(state.airLast())) {
+            airCurrent = airEnd;
+        }
         addStartingPositions(firePreviews, state.fireStartingPositions(), ElementType.FIRE);
         addStartingPositions(waterPreviews, state.waterStartingPositions(), ElementType.WATER);
         addStartingPositions(earthPreviews, state.earthStartingPositions(), ElementType.EARTH);
@@ -118,16 +129,16 @@ public class Board extends WidgetGroup {
             image.setOrigin(Align.center);
             addActor(image);
             visibleTiles.add(image);
-            if (state.fireLast() == position) {
+            if (state.fireLast().equals(position)) {
                 fireCurrent = image;
             }
-            if (state.waterLast() == position) {
+            if (state.waterLast().equals(position)) {
                 waterCurrent = image;
             }
-            if (state.earthLast() == position) {
+            if (state.earthLast().equals(position)) {
                 earthCurrent = image;
             }
-            if (state.airLast() == position) {
+            if (state.airLast().equals(position)) {
                 airCurrent = image;
             }
         });
@@ -229,6 +240,8 @@ public class Board extends WidgetGroup {
         private final Vector2 screenCoords = new Vector2();
         private final ElementType type;
         private ClickListener listener;
+        private ClickListener removeListener;
+        private ClickListener cancelListener;
 
         public PlaceTile(ElementType type) {
             super();
@@ -240,9 +253,6 @@ public class Board extends WidgetGroup {
             listener = new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
-                    if (event.getButton() != Input.Buttons.LEFT) {
-                        return;
-                    }
                     Actor target = event.getTarget();
                     Vector2 positionOnBoard = ElementPosition.positionOnBoard(
                             board.getStage().getViewport(), screenCoords.set(target.getX(), target.getY()));
@@ -255,10 +265,44 @@ public class Board extends WidgetGroup {
                 preview.setVisible(true);
                 preview.addListener(listener);
             }
+            removeListener = new ClickListener(Input.Buttons.RIGHT) {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    Actor target = event.getTarget();
+                    Vector2 positionOnBoard = ElementPosition.positionOnBoard(
+                            board.getStage().getViewport(), screenCoords.set(target.getX(), target.getY()));
+
+                    board.listener.onElementRemoved(new GridPoint2((int) positionOnBoard.x, (int) positionOnBoard.y));
+                    goToSelection(board);
+                }
+            };
+            current(board).addListener(removeListener);
+            cancelListener = new ClickListener(Input.Buttons.RIGHT) {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    goToSelection(board);
+                }
+            };
+            board.addListener(cancelListener);
         }
 
         private void goToSelection(Board board) {
             board.stateMachine.changeState(new Selection());
+        }
+
+        private Image current(Board board) {
+            switch (type) {
+                case FIRE:
+                    return board.fireCurrent;
+                case WATER:
+                    return board.waterCurrent;
+                case EARTH:
+                    return board.earthCurrent;
+                case AIR:
+                    return board.airCurrent;
+                default:
+                    throw new IllegalStateException("Element type unrecognized " + type);
+            }
         }
 
         private List<Image> previews(Board board) {
@@ -277,19 +321,13 @@ public class Board extends WidgetGroup {
         }
 
         @Override
-        public void update(Board board) {
-            super.update(board);
-            if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
-                goToSelection(board);
-            }
-        }
-
-        @Override
         public void exit(Board board) {
             for (Image preview : previews(board)) {
                 preview.setVisible(false);
                 preview.removeListener(listener);
             }
+            current(board).removeListener(removeListener);
+            board.removeListener(cancelListener);
         }
     }
 
@@ -301,5 +339,6 @@ public class Board extends WidgetGroup {
 
     public interface Listener {
         void onElementPlaced(ElementType type, GridPoint2 position);
+        void onElementRemoved(GridPoint2 position);
     }
 }
