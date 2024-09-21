@@ -205,16 +205,30 @@ public class Board extends WidgetGroup {
         private ClickListener earthListener;
         private ClickListener airListener;
 
+        private ClickListener fireDeleteListener;
+        private ClickListener waterDeleteListener;
+        private ClickListener earthDeleteListener;
+        private ClickListener airDeleteListener;
+        private final Vector2 screenCoords = new Vector2();
+
         @Override
         public void enter(Board board) {
             fireListener = createListener(board, ElementType.FIRE);
             board.fireCurrent.addListener(fireListener);
+            fireDeleteListener = deleteListener(board);
+            board.fireCurrent.addListener(fireDeleteListener);
             waterListener = createListener(board, ElementType.WATER);
             board.waterCurrent.addListener(waterListener);
+            waterDeleteListener = deleteListener(board);
+            board.waterCurrent.addListener(waterDeleteListener);
             earthListener = createListener(board, ElementType.EARTH);
             board.earthCurrent.addListener(earthListener);
+            earthDeleteListener = deleteListener(board);
+            board.earthCurrent.addListener(earthDeleteListener);
             airListener = createListener(board, ElementType.AIR);
             board.airCurrent.addListener(airListener);
+            airDeleteListener = deleteListener(board);
+            board.airCurrent.addListener(airDeleteListener);
         }
 
         private ClickListener createListener(Board board, final ElementType type) {
@@ -226,12 +240,29 @@ public class Board extends WidgetGroup {
             };
         }
 
+        private ClickListener deleteListener(Board board) {
+            return new ClickListener(Input.Buttons.RIGHT) {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    Actor target = event.getTarget();
+                    Vector2 positionOnBoard = ElementPosition.positionOnBoard(
+                            board.getStage().getViewport(), screenCoords.set(target.getX(), target.getY()));
+                    board.listener.onElementRemoved(new GridPoint2((int) positionOnBoard.x, (int) positionOnBoard.y));
+                    board.stateMachine.changeState(new Selection());
+                }
+            };
+        }
+
         @Override
         public void exit(Board board) {
             board.fireCurrent.removeListener(fireListener);
+            board.fireCurrent.removeListener(fireDeleteListener);
             board.waterCurrent.removeListener(waterListener);
+            board.waterCurrent.removeListener(waterDeleteListener);
             board.earthCurrent.removeListener(earthListener);
+            board.earthCurrent.removeListener(earthDeleteListener);
             board.airCurrent.removeListener(airListener);
+            board.airCurrent.removeListener(airDeleteListener);
         }
     }
 
@@ -240,7 +271,6 @@ public class Board extends WidgetGroup {
         private final Vector2 screenCoords = new Vector2();
         private final ElementType type;
         private ClickListener listener;
-        private ClickListener removeListener;
         private ClickListener cancelListener;
 
         public PlaceTile(ElementType type) {
@@ -265,18 +295,6 @@ public class Board extends WidgetGroup {
                 preview.setVisible(true);
                 preview.addListener(listener);
             }
-            removeListener = new ClickListener(Input.Buttons.RIGHT) {
-                @Override
-                public void clicked(InputEvent event, float x, float y) {
-                    Actor target = event.getTarget();
-                    Vector2 positionOnBoard = ElementPosition.positionOnBoard(
-                            board.getStage().getViewport(), screenCoords.set(target.getX(), target.getY()));
-
-                    board.listener.onElementRemoved(new GridPoint2((int) positionOnBoard.x, (int) positionOnBoard.y));
-                    goToSelection(board);
-                }
-            };
-            current(board).addListener(removeListener);
             cancelListener = new ClickListener(Input.Buttons.RIGHT) {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
@@ -288,21 +306,6 @@ public class Board extends WidgetGroup {
 
         private void goToSelection(Board board) {
             board.stateMachine.changeState(new Selection());
-        }
-
-        private Image current(Board board) {
-            switch (type) {
-                case FIRE:
-                    return board.fireCurrent;
-                case WATER:
-                    return board.waterCurrent;
-                case EARTH:
-                    return board.earthCurrent;
-                case AIR:
-                    return board.airCurrent;
-                default:
-                    throw new IllegalStateException("Element type unrecognized " + type);
-            }
         }
 
         private List<Image> previews(Board board) {
@@ -326,7 +329,6 @@ public class Board extends WidgetGroup {
                 preview.setVisible(false);
                 preview.removeListener(listener);
             }
-            current(board).removeListener(removeListener);
             board.removeListener(cancelListener);
         }
     }
