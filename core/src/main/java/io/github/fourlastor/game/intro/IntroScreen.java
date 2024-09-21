@@ -204,7 +204,7 @@ public class IntroScreen extends ScreenAdapter {
     public void show() {
         super.show();
         multiplexer.addProcessor(stage);
-        //        music.play();
+        music.play();
     }
 
     @Override
