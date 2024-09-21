@@ -11,6 +11,8 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -84,11 +86,31 @@ public class IntroScreen extends ScreenAdapter {
                 stateContainer.update(it -> it.remove(position));
             }
         });
+        TextureAtlas.AtlasRegion winTexture = atlas.findRegion("win_condition_text");
+        Image winConditionText = new Image(winTexture);
+        float scale = ((float) Config.TILE_COUNT * Config.TILE_SIZE) / winTexture.getRegionWidth();
+        winConditionText.setPosition(stage.getWidth() / 2f, stage.getHeight() / 2, Align.center);
+        winConditionText.setOrigin(Align.center);
+        winConditionText.setScale(scale);
+        Color winColor = new Color(Color.WHITE);
+        winColor.a = 0;
+        winConditionText.setColor(winColor);
+        winConditionText.setTouchable(Touchable.disabled);
+        Image winOverlay = new Image(atlas.findRegion("whitePixel"));
+        Color overlayColor = new Color(Color.BLACK);
+        overlayColor.a = 0;
+        winOverlay.setColor(overlayColor);
+        winOverlay.setSize(stage.getWidth(), stage.getHeight());
+        winOverlay.setTouchable(Touchable.disabled);
         stage.addActor(board);
+        stage.addActor(winOverlay);
+        stage.addActor(winConditionText);
         stateContainer.listen(board::update);
         stateContainer.distinct(State::gameWon).listen(state -> {
             if (state.gameWon()) {
-                Gdx.app.log("Intro", "YAY GAME WON");
+                board.setTouchable(Touchable.disabled);
+                winConditionText.addAction(Actions.fadeIn(1));
+                winOverlay.addAction(Actions.alpha(0.5f, 1));
             }
         });
     }
