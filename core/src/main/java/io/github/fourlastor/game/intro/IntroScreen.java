@@ -16,7 +16,6 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import io.github.fourlastor.game.intro.state.State;
 import io.github.fourlastor.game.intro.ui.Board;
-import io.github.fourlastor.game.intro.ui.Palette;
 import io.github.fourlastor.game.state.StateContainer;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -59,8 +58,12 @@ public class IntroScreen extends ScreenAdapter {
         Board board =
                 new Board(element, tile, ((type, position) -> stateContainer.update(it -> it.add(type, position))));
         stage.addActor(board);
-        stage.addActor(new Palette(element, (type, position) -> stateContainer.update(it -> it.add(type, position))));
         stateContainer.listen(board::update);
+        stateContainer.distinct(State::gameWon).listen(state -> {
+            if (state.gameWon()) {
+                System.out.println("YAY GAME WON");
+            }
+        });
     }
 
     private static Image createGrid(ShapeDrawer shapeDrawer) {

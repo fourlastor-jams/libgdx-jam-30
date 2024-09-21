@@ -61,6 +61,26 @@ public abstract class State {
         return results;
     }
 
+    public boolean gameWon() {
+        return areAdjacent(fireStart(), fireLast())
+                && areAdjacent(waterStart(), waterLast())
+                && areAdjacent(earthStart(), earthLast())
+                && areAdjacent(airStart(), airLast())
+        ;
+    }
+
+    private boolean areAdjacent(Element startElement, GridPoint2 last) {
+        int x = last.x;
+        int y = last.y;
+        GridPoint2 start = startElement.position();
+        return (
+                start.x == x && start.y == y - 1
+                        || start.x == x && start.y == y + 1
+                        || start.x == x - 1 && start.y == y
+                        || start.x == x + 1 && start.y == y
+        );
+    }
+
     private void addPositions(Element start, Element end, GridPoint2 last, List<GridPoint2> results) {
         if (!start.visible() || !end.visible()) {
             return;
