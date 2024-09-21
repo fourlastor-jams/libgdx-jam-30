@@ -73,17 +73,17 @@ public class IntroScreen extends ScreenAdapter {
                 int count = Config.TILE_COUNT;
                 float squareWidth = width / count;
                 float squareHeight = height / count;
-                boolean dark = true;
+                boolean light = true;
                 for (int column = 0; column < count; column++) {
                     for (int row = 0; row < count; row++) {
                         float rX = squareWidth * row + x;
                         float rY = squareHeight * column + y;
-                        Color color = dark ? Color.LIGHT_GRAY : Color.LIME;
+                        Color color = light ? Config.LIGHT_TILE : Config.DARK_TILE;
                         shapeDrawer.filledRectangle(rX, rY, squareWidth, squareHeight, color);
-                        dark = !dark;
+                        light = !light;
                     }
                     if (count % 2 == 0) {
-                        dark = !dark;
+                        light = !light;
                     }
                 }
             }
