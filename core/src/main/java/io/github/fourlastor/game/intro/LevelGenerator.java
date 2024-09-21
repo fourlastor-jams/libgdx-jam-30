@@ -16,19 +16,6 @@ public class LevelGenerator {
         this.random = random;
     }
 
-    public State manually() {
-        return State.game(
-                new GridPoint2(0, 4), // fs
-                new GridPoint2(3, 0), // fe
-                new GridPoint2(1, 2), // ws
-                new GridPoint2(3, 3), // we
-                new GridPoint2(1, 1), // es
-                new GridPoint2(4, 0), // ee
-                new GridPoint2(1, 4), // as
-                new GridPoint2(2, 2) // ae
-                );
-    }
-
     public State generateLevel() {
         List<GridPoint2> generated = new ArrayList<>(16);
         for (int i = 0; i < 8; i++) {
