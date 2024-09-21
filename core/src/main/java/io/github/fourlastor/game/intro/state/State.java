@@ -98,16 +98,16 @@ public abstract class State {
         GridPoint2 currentCandidate = new GridPoint2(last);
         int x = currentCandidate.x;
         int y = currentCandidate.y;
-        if (spotFree(currentCandidate.set(x - 1, y))) {
+        for (int cx = x - 1; spotFree(currentCandidate.set(cx, y)); cx--) {
             results.add(new GridPoint2(currentCandidate));
         }
-        if (spotFree(currentCandidate.set(x + 1, y))) {
+        for (int cx = x + 1; spotFree(currentCandidate.set(cx, y)); cx++) {
             results.add(new GridPoint2(currentCandidate));
         }
-        if (spotFree(currentCandidate.set(x, y - 1))) {
+        for (int cy = y - 1; spotFree(currentCandidate.set(x, cy)); cy--) {
             results.add(new GridPoint2(currentCandidate));
         }
-        if (spotFree(currentCandidate.set(x, y + 1))) {
+        for (int cy = y + 1; spotFree(currentCandidate.set(x, cy)); cy++) {
             results.add(new GridPoint2(currentCandidate));
         }
     }
@@ -191,72 +191,36 @@ public abstract class State {
     }
 
     public State add(ElementType type, GridPoint2 position) {
+        HashMap<GridPoint2, Tile> newTiles;
         switch (type) {
             case FIRE:
-                if (!fireStart().visible()) {
-                    return builder()
-                            .fireStart(fireStart().builder().position(position).build())
-                            .build();
-                } else if (!fireEnd().visible()) {
-                    return builder()
-                            .fireEnd(fireEnd().builder().position(position).build())
-                            .fireLast(position)
-                            .build();
-                } else {
-                    HashMap<GridPoint2, Tile> newTiles = new HashMap<>(tiles());
-                    newTiles.put(position, Tile.create(type));
-                    return builder().tiles(newTiles).fireLast(position).build();
-                }
+                newTiles = addTilesTo(fireLast(), position, type);
+                return builder().tiles(newTiles).fireLast(position).build();
             case WATER:
-                if (!waterStart().visible()) {
-                    return builder()
-                            .waterStart(
-                                    waterStart().builder().position(position).build())
-                            .build();
-                } else if (!waterEnd().visible()) {
-                    return builder()
-                            .waterEnd(waterEnd().builder().position(position).build())
-                            .waterLast(position)
-                            .build();
-                } else {
-                    HashMap<GridPoint2, Tile> newTiles = new HashMap<>(tiles());
-                    newTiles.put(position, Tile.create(type));
-                    return builder().tiles(newTiles).waterLast(position).build();
-                }
+                newTiles = addTilesTo(waterLast(), position, type);
+                return builder().tiles(newTiles).waterLast(position).build();
             case EARTH:
-                if (!earthStart().visible()) {
-                    return builder()
-                            .earthStart(
-                                    earthStart().builder().position(position).build())
-                            .build();
-                } else if (!earthEnd().visible()) {
-                    return builder()
-                            .earthEnd(earthEnd().builder().position(position).build())
-                            .earthLast(position)
-                            .build();
-                } else {
-                    HashMap<GridPoint2, Tile> newTiles = new HashMap<>(tiles());
-                    newTiles.put(position, Tile.create(type));
-                    return builder().tiles(newTiles).earthLast(position).build();
-                }
+                newTiles = addTilesTo(earthLast(), position, type);
+                return builder().tiles(newTiles).earthLast(position).build();
             case AIR:
-                if (!airStart().visible()) {
-                    return builder()
-                            .airStart(airStart().builder().position(position).build())
-                            .build();
-                } else if (!airEnd().visible()) {
-                    return builder()
-                            .airEnd(airEnd().builder().position(position).build())
-                            .airLast(position)
-                            .build();
-                } else {
-                    HashMap<GridPoint2, Tile> newTiles = new HashMap<>(tiles());
-                    newTiles.put(position, Tile.create(type));
-                    return builder().tiles(newTiles).airLast(position).build();
-                }
+                newTiles = addTilesTo(airLast(), position, type);
+                return builder().tiles(newTiles).airLast(position).build();
             default:
                 return this;
         }
+    }
+
+    private HashMap<GridPoint2, Tile> addTilesTo(GridPoint2 initial, GridPoint2 position, ElementType type) {
+        HashMap<GridPoint2, Tile> newTiles;
+        newTiles = new HashMap<>(tiles());
+        for (int x = initial.x; x != position.x; x += Integer.signum(position.x - x)) {
+            newTiles.put(new GridPoint2(x, position.y), Tile.create(type));
+        }
+        for (int y = initial.y; y != position.y; y += Integer.signum(position.y - y)) {
+            newTiles.put(new GridPoint2(position.x, y), Tile.create(type));
+        }
+        newTiles.put(position, Tile.create(type));
+        return newTiles;
     }
 
     public static State game(
@@ -268,15 +232,30 @@ public abstract class State {
             GridPoint2 earthEnd,
             GridPoint2 airStart,
             GridPoint2 airEnd) {
-        return initial()
-                .add(ElementType.FIRE, fireStart)
-                .add(ElementType.FIRE, fireEnd)
-                .add(ElementType.WATER, waterStart)
-                .add(ElementType.WATER, waterEnd)
-                .add(ElementType.EARTH, earthStart)
-                .add(ElementType.EARTH, earthEnd)
-                .add(ElementType.AIR, airStart)
-                .add(ElementType.AIR, airEnd);
+        return new AutoValue_State.Builder()
+                .fireStart(Element.on(fireStart))
+                .fireEnd(Element.on(fireEnd))
+                .fireLast(fireEnd)
+                .waterStart(Element.on(waterStart))
+                .waterEnd(Element.on(waterEnd))
+                .waterLast(waterEnd)
+                .earthStart(Element.on(earthStart))
+                .earthEnd(Element.on(earthEnd))
+                .earthLast(earthEnd)
+                .airStart(Element.on(airStart))
+                .airEnd(Element.on(airEnd))
+                .airLast(airEnd)
+                .tiles(new HashMap<>())
+                .build();
+        //        return initial()
+        //                .add(ElementType.FIRE, fireStart)
+        //                .add(ElementType.FIRE, fireEnd)
+        //                .add(ElementType.WATER, waterStart)
+        //                .add(ElementType.WATER, waterEnd)
+        //                .add(ElementType.EARTH, earthStart)
+        //                .add(ElementType.EARTH, earthEnd)
+        //                .add(ElementType.AIR, airStart)
+        //                .add(ElementType.AIR, airEnd);
     }
 
     public static State initial() {
