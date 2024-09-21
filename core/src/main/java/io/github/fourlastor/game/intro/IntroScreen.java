@@ -69,7 +69,9 @@ public class IntroScreen extends ScreenAdapter {
                         shapeDrawer.filledRectangle(rX, rY, squareWidth, squareHeight, color);
                         dark = !dark;
                     }
-                    dark = !dark;
+                    if (count % 2 == 0) {
+                        dark = !dark;
+                    }
                 }
             }
         });
