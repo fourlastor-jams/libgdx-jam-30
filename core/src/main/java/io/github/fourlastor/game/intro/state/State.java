@@ -213,10 +213,12 @@ public abstract class State {
     private HashMap<GridPoint2, Tile> addTilesTo(GridPoint2 initial, GridPoint2 position, ElementType type) {
         HashMap<GridPoint2, Tile> newTiles;
         newTiles = new HashMap<>(tiles());
-        for (int x = initial.x; x != position.x; x += Integer.signum(position.x - x)) {
+        int dX = Integer.signum(position.x - initial.x);
+        for (int x = initial.x + dX; x != position.x; x += dX) {
             newTiles.put(new GridPoint2(x, position.y), Tile.create(type));
         }
-        for (int y = initial.y; y != position.y; y += Integer.signum(position.y - y)) {
+        int dY = Integer.signum(position.y - initial.y);
+        for (int y = initial.y + dY; y != position.y; y += dY) {
             newTiles.put(new GridPoint2(position.x, y), Tile.create(type));
         }
         newTiles.put(position, Tile.create(type));
@@ -245,33 +247,6 @@ public abstract class State {
                 .airStart(Element.on(airStart))
                 .airEnd(Element.on(airEnd))
                 .airLast(airEnd)
-                .tiles(new HashMap<>())
-                .build();
-        //        return initial()
-        //                .add(ElementType.FIRE, fireStart)
-        //                .add(ElementType.FIRE, fireEnd)
-        //                .add(ElementType.WATER, waterStart)
-        //                .add(ElementType.WATER, waterEnd)
-        //                .add(ElementType.EARTH, earthStart)
-        //                .add(ElementType.EARTH, earthEnd)
-        //                .add(ElementType.AIR, airStart)
-        //                .add(ElementType.AIR, airEnd);
-    }
-
-    public static State initial() {
-        return new AutoValue_State.Builder()
-                .fireStart(Element.initial())
-                .fireEnd(Element.initial())
-                .fireLast(new GridPoint2())
-                .waterStart(Element.initial())
-                .waterEnd(Element.initial())
-                .waterLast(new GridPoint2())
-                .earthStart(Element.initial())
-                .earthEnd(Element.initial())
-                .earthLast(new GridPoint2())
-                .airStart(Element.initial())
-                .airEnd(Element.initial())
-                .airLast(new GridPoint2())
                 .tiles(new HashMap<>())
                 .build();
     }

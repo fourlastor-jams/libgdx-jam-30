@@ -6,23 +6,30 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.GridPoint2;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.actions.SequenceAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import io.github.fourlastor.game.di.modules.AssetsModule;
 import io.github.fourlastor.game.intro.state.ElementType;
 import io.github.fourlastor.game.intro.state.State;
 import io.github.fourlastor.game.intro.ui.Board;
 import io.github.fourlastor.game.route.Router;
 import io.github.fourlastor.game.state.StateContainer;
+import io.github.fourlastor.perceptual.Perceptual;
 import javax.inject.Inject;
 import javax.inject.Named;
 import space.earlygrey.shapedrawer.ShapeDrawer;
@@ -37,6 +44,13 @@ public class IntroScreen extends ScreenAdapter {
     private final InputMultiplexer multiplexer;
     private final Router router;
     private final StateContainer<State> stateContainer;
+    private final Music music;
+    private final Sound fireSound;
+    private final Sound waterSound;
+    private final Sound earthSound;
+    private final Sound airSound;
+    private int tilesCount = 0;
+    private ElementType lastType = null;
 
     @Inject
     public IntroScreen(
@@ -44,10 +58,12 @@ public class IntroScreen extends ScreenAdapter {
             TextureAtlas atlas,
             InputMultiplexer multiplexer,
             Router router,
-            LevelGenerator generator) {
+            LevelGenerator generator,
+            AssetManager assetManager) {
         this.multiplexer = multiplexer;
         this.router = router;
-        viewport = new FitViewport(Config.TILE_SIZE * Config.TILE_COUNT, Config.TILE_SIZE * Config.TILE_COUNT);
+        viewport =
+                new FitViewport(Config.TILE_SIZE * (Config.TILE_COUNT + 2), Config.TILE_SIZE * (Config.TILE_COUNT + 2));
         stage = new Stage(viewport);
         ShapeDrawer shapeDrawer = new ShapeDrawer(stage.getBatch(), whitePixel);
         Image bg = new Image(whitePixel);
@@ -55,8 +71,9 @@ public class IntroScreen extends ScreenAdapter {
         bg.setColor(new Color(0x333333ff));
         stage.addActor(bg);
         Image image = createGrid(shapeDrawer);
-        image.setPosition(stage.getWidth() / 2, 0, Align.center | Align.bottom);
         stage.addActor(image);
+        Image walls = new Image(atlas.findRegion("walls"));
+        stage.addActor(walls);
         ElementTextures elementTextures = new ElementTextures(
                 atlas.findRegion("elements/fire-element"),
                 atlas.findRegion("elements/fire-tile"),
@@ -71,6 +88,7 @@ public class IntroScreen extends ScreenAdapter {
         Board board = new Board(elementTextures, tile, new Board.Listener() {
             @Override
             public void onElementPlaced(ElementType type, GridPoint2 position) {
+                lastType = type;
                 stateContainer.update(it -> it.add(type, position));
             }
 
@@ -79,6 +97,7 @@ public class IntroScreen extends ScreenAdapter {
                 stateContainer.update(it -> it.remove(position));
             }
         });
+        board.setPosition(Config.TILE_SIZE, Config.TILE_SIZE);
         TextureAtlas.AtlasRegion winTexture = atlas.findRegion("win_condition_text");
         Image winConditionText = new Image(winTexture);
         float scale = ((float) Config.TILE_COUNT * Config.TILE_SIZE) / winTexture.getRegionWidth();
@@ -106,6 +125,47 @@ public class IntroScreen extends ScreenAdapter {
                 winOverlay.addAction(Actions.alpha(0.5f, 1));
             }
         });
+        fireSound = assetManager.get(AssetsModule.FIRE_PATH);
+        waterSound = assetManager.get(AssetsModule.WATER_PATH);
+        earthSound = assetManager.get(AssetsModule.EARTH_PATH);
+        airSound = assetManager.get(AssetsModule.AIR_PATH);
+        Sound delete = assetManager.get(AssetsModule.DELETE_PATH);
+        stateContainer.distinct(State::tiles).listen(state -> {
+            int tilesSize = state.tiles().size();
+            int difference = tilesSize - tilesCount;
+            if (difference > 0 && lastType != null) {
+                Sound sound = selectSound(lastType);
+                SequenceAction sequence = Actions.sequence();
+                for (int i = 0; i < difference; i++) {
+                    float pitch = 1 + (i / 10f);
+                    float delay = MathUtils.clamp(0.2f - (i / 15f), 0.1f, 0.2f);
+                    sequence.addAction(Actions.run(() -> sound.play(Perceptual.perceptualToAmplitude(0.5f), pitch, 0)));
+                    sequence.addAction(Actions.delay(delay));
+                }
+                stage.addAction(sequence);
+            } else if (difference < 0) {
+                delete.play();
+            }
+            tilesCount = tilesSize;
+        });
+        music = assetManager.get(AssetsModule.MUSIC_PATH);
+        music.setVolume(Perceptual.perceptualToAmplitude(0.7f));
+        music.setLooping(true);
+    }
+
+    private Sound selectSound(ElementType type) {
+        switch (type) {
+            case FIRE:
+                return fireSound;
+            case WATER:
+                return waterSound;
+            case EARTH:
+                return earthSound;
+            case AIR:
+                return airSound;
+            default:
+                throw new IllegalArgumentException("Invalid type");
+        }
     }
 
     private static Image createGrid(ShapeDrawer shapeDrawer) {
@@ -131,6 +191,7 @@ public class IntroScreen extends ScreenAdapter {
             }
         });
         image.setSize(Config.TILE_SIZE * Config.TILE_COUNT, Config.TILE_SIZE * Config.TILE_COUNT);
+        image.setPosition(Config.TILE_SIZE, Config.TILE_SIZE);
         return image;
     }
 
@@ -143,6 +204,7 @@ public class IntroScreen extends ScreenAdapter {
     public void show() {
         super.show();
         multiplexer.addProcessor(stage);
+        //        music.play();
     }
 
     @Override
@@ -157,6 +219,7 @@ public class IntroScreen extends ScreenAdapter {
 
     @Override
     public void hide() {
+        music.stop();
         multiplexer.removeProcessor(stage);
         super.hide();
     }
