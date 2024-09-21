@@ -9,12 +9,16 @@ import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.GridPoint2;
+import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Align;
 import io.github.fourlastor.game.intro.ElementTextures;
 import io.github.fourlastor.game.intro.state.Element;
 import io.github.fourlastor.game.intro.state.ElementType;
@@ -53,15 +57,19 @@ public class Board extends WidgetGroup {
         setFillParent(true);
         fireStart = createButton(textures.fireElement);
         fireEnd = createButton(textures.fireTile);
+        fireEnd.setOrigin(Align.center);
         fireCurrent = fireEnd;
         waterStart = createButton(textures.waterElement);
         waterEnd = createButton(textures.waterTile);
+        waterEnd.setOrigin(Align.center);
         waterCurrent = waterEnd;
         earthStart = createButton(textures.earthElement);
         earthEnd = createButton(textures.earthTile);
+        earthEnd.setOrigin(Align.center);
         earthCurrent = earthEnd;
         airStart = createButton(textures.airElement);
         airEnd = createButton(textures.airTile);
+        airEnd.setOrigin(Align.center);
         airCurrent = airEnd;
         addActor(fireStart);
         addActor(fireEnd);
@@ -75,7 +83,19 @@ public class Board extends WidgetGroup {
         stateMachine.changeState(new Selection());
     }
 
+    private static Action highlightAction() {
+        return Actions.forever(Actions.sequence(
+                Actions.scaleTo(1.05f, 1.05f, 0.2f, Interpolation.circleOut),
+                Actions.delay(0.3f),
+                Actions.scaleTo(1, 1, 0.1f, Interpolation.circleIn),
+                Actions.delay(0.3f)));
+    }
+
     public void update(State state) {
+        fireCurrent.clearActions();
+        waterCurrent.clearActions();
+        earthCurrent.clearActions();
+        airCurrent.clearActions();
         updateElement(state.fireStart(), fireStart);
         updateElement(state.fireEnd(), fireEnd);
         updateElement(state.waterStart(), waterStart);
@@ -95,6 +115,7 @@ public class Board extends WidgetGroup {
         state.tiles().forEach((position, current) -> {
             Image image = new Image(current.type().tileSelector.apply(textures));
             image.setPosition(position.x * TILE_SIZE, position.y * TILE_SIZE);
+            image.setOrigin(Align.center);
             addActor(image);
             visibleTiles.add(image);
             if (state.fireLast() == position) {
@@ -110,6 +131,10 @@ public class Board extends WidgetGroup {
                 airCurrent = image;
             }
         });
+        fireCurrent.addAction(highlightAction());
+        waterCurrent.addAction(highlightAction());
+        earthCurrent.addAction(highlightAction());
+        airCurrent.addAction(highlightAction());
     }
 
     private void addStartingPositions(List<Image> previews, List<GridPoint2> startingPositions, ElementType type) {

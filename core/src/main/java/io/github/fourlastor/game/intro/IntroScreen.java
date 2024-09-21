@@ -45,10 +45,11 @@ public class IntroScreen extends ScreenAdapter {
             ));
 
     @Inject
-    public IntroScreen(@Named(WHITE_PIXEL) TextureRegion whitePixel,
-                       TextureAtlas atlas,
-                       InputMultiplexer multiplexer,
-                       Router router) {
+    public IntroScreen(
+            @Named(WHITE_PIXEL) TextureRegion whitePixel,
+            TextureAtlas atlas,
+            InputMultiplexer multiplexer,
+            Router router) {
         this.multiplexer = multiplexer;
         this.router = router;
         viewport = new FitViewport(Config.TILE_SIZE * Config.TILE_COUNT, Config.TILE_SIZE * Config.TILE_COUNT);
@@ -77,7 +78,7 @@ public class IntroScreen extends ScreenAdapter {
         stateContainer.listen(board::update);
         stateContainer.distinct(State::gameWon).listen(state -> {
             if (state.gameWon()) {
-                System.out.println("YAY GAME WON");
+                Gdx.app.log("Intro", "YAY GAME WON");
             }
         });
     }
