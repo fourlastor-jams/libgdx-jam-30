@@ -6,6 +6,9 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.assets.AssetManager;
+import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -13,11 +16,13 @@ import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
+import com.badlogic.gdx.scenes.scene2d.actions.SequenceAction;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import io.github.fourlastor.game.di.modules.AssetsModule;
 import io.github.fourlastor.game.intro.state.ElementType;
 import io.github.fourlastor.game.intro.state.State;
 import io.github.fourlastor.game.intro.ui.Board;
@@ -25,6 +30,8 @@ import io.github.fourlastor.game.route.Router;
 import io.github.fourlastor.game.state.StateContainer;
 import javax.inject.Inject;
 import javax.inject.Named;
+
+import io.github.fourlastor.perceptual.Perceptual;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 import space.earlygrey.shapedrawer.scene2d.ShapeDrawerDrawable;
 
@@ -37,6 +44,8 @@ public class IntroScreen extends ScreenAdapter {
     private final InputMultiplexer multiplexer;
     private final Router router;
     private final StateContainer<State> stateContainer;
+    private final Music music;
+    private int tilesCount = 0;
 
     @Inject
     public IntroScreen(
@@ -44,7 +53,8 @@ public class IntroScreen extends ScreenAdapter {
             TextureAtlas atlas,
             InputMultiplexer multiplexer,
             Router router,
-            LevelGenerator generator) {
+            LevelGenerator generator,
+            AssetManager assetManager) {
         this.multiplexer = multiplexer;
         this.router = router;
         viewport = new FitViewport(Config.TILE_SIZE * Config.TILE_COUNT, Config.TILE_SIZE * Config.TILE_COUNT);
@@ -106,6 +116,28 @@ public class IntroScreen extends ScreenAdapter {
                 winOverlay.addAction(Actions.alpha(0.5f, 1));
             }
         });
+        Sound sound = assetManager.get(AssetsModule.FIRE_PATH);
+        stateContainer.distinct(State::tiles).listen(state -> {
+            int tilesSize = state.tiles().size();
+            int difference = tilesSize - tilesCount;
+            if (difference > 0) {
+                SequenceAction sequence = Actions.sequence();
+                for (int i = 0; i < difference; i++) {
+                    float pitch = 1 + (i / 10f);
+                    sequence.addAction(Actions.run(() -> sound.play(
+                            Perceptual.perceptualToAmplitude(0.5f),
+                            pitch,
+                            0
+                    )));
+                    sequence.addAction(Actions.delay(0.1f));
+                }
+                stage.addAction(sequence);
+            }
+            tilesCount = tilesSize;
+        });
+        music = assetManager.get(AssetsModule.MUSIC_PATH);
+        music.setVolume(Perceptual.perceptualToAmplitude(0.7f));
+        music.setLooping(true);
     }
 
     private static Image createGrid(ShapeDrawer shapeDrawer) {
@@ -143,6 +175,7 @@ public class IntroScreen extends ScreenAdapter {
     public void show() {
         super.show();
         multiplexer.addProcessor(stage);
+//        music.play();
     }
 
     @Override
@@ -157,6 +190,7 @@ public class IntroScreen extends ScreenAdapter {
 
     @Override
     public void hide() {
+        music.stop();
         multiplexer.removeProcessor(stage);
         super.hide();
     }
