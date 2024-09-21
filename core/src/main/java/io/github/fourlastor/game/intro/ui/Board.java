@@ -2,17 +2,23 @@ package io.github.fourlastor.game.intro.ui;
 
 import static io.github.fourlastor.game.intro.Config.TILE_SIZE;
 
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ai.fsm.DefaultStateMachine;
 import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.GridPoint2;
+import com.badlogic.gdx.math.Interpolation;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.scenes.scene2d.Action;
 import com.badlogic.gdx.scenes.scene2d.Actor;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.utils.Align;
+import io.github.fourlastor.game.intro.ElementTextures;
 import io.github.fourlastor.game.intro.state.Element;
 import io.github.fourlastor.game.intro.state.ElementType;
 import io.github.fourlastor.game.intro.state.State;
@@ -23,33 +29,47 @@ public class Board extends WidgetGroup {
 
     private final Image fireStart;
     private final Image fireEnd;
+    private Image fireCurrent;
     private final List<Image> firePreviews = new ArrayList<>();
     private final Image waterStart;
     private final Image waterEnd;
+    private Image waterCurrent;
     private final List<Image> waterPreviews = new ArrayList<>();
     private final Image earthStart;
     private final Image earthEnd;
+    private Image earthCurrent;
     private final List<Image> earthPreviews = new ArrayList<>();
     private final Image airStart;
     private final Image airEnd;
+    private Image airCurrent;
     private final List<Image> airPreviews = new ArrayList<>();
     private final List<Image> visibleTiles = new ArrayList<>();
     private final StateMachine stateMachine;
+    private final ElementTextures textures;
     private final TextureRegion tile;
     private final Listener listener;
 
-    public Board(TextureRegion element, TextureRegion tile, Listener listener) {
+    public Board(ElementTextures textures, TextureRegion tile, Listener listener) {
+        this.textures = textures;
         this.tile = tile;
         this.listener = listener;
         setFillParent(true);
-        fireStart = createButton(element, ElementType.FIRE);
-        fireEnd = createButton(tile, ElementType.FIRE);
-        waterStart = createButton(element, ElementType.WATER);
-        waterEnd = createButton(tile, ElementType.WATER);
-        earthStart = createButton(element, ElementType.EARTH);
-        earthEnd = createButton(tile, ElementType.EARTH);
-        airStart = createButton(element, ElementType.AIR);
-        airEnd = createButton(tile, ElementType.AIR);
+        fireStart = createButton(textures.fireElement);
+        fireEnd = createButton(textures.fireTile);
+        fireEnd.setOrigin(Align.center);
+        fireCurrent = fireEnd;
+        waterStart = createButton(textures.waterElement);
+        waterEnd = createButton(textures.waterTile);
+        waterEnd.setOrigin(Align.center);
+        waterCurrent = waterEnd;
+        earthStart = createButton(textures.earthElement);
+        earthEnd = createButton(textures.earthTile);
+        earthEnd.setOrigin(Align.center);
+        earthCurrent = earthEnd;
+        airStart = createButton(textures.airElement);
+        airEnd = createButton(textures.airTile);
+        airEnd.setOrigin(Align.center);
+        airCurrent = airEnd;
         addActor(fireStart);
         addActor(fireEnd);
         addActor(waterStart);
@@ -62,15 +82,39 @@ public class Board extends WidgetGroup {
         stateMachine.changeState(new Selection());
     }
 
+    private static Action highlightAction() {
+        return Actions.forever(Actions.sequence(
+                Actions.scaleTo(1.05f, 1.05f, 0.2f, Interpolation.circleOut),
+                Actions.delay(0.3f),
+                Actions.scaleTo(1, 1, 0.1f, Interpolation.circleIn),
+                Actions.delay(0.3f)));
+    }
+
     public void update(State state) {
+        fireCurrent.clearActions();
+        waterCurrent.clearActions();
+        earthCurrent.clearActions();
+        airCurrent.clearActions();
         updateElement(state.fireStart(), fireStart);
         updateElement(state.fireEnd(), fireEnd);
+        if (state.fireEnd().position().equals(state.fireLast())) {
+            fireCurrent = fireEnd;
+        }
         updateElement(state.waterStart(), waterStart);
         updateElement(state.waterEnd(), waterEnd);
+        if (state.waterEnd().position().equals(state.waterLast())) {
+            waterCurrent = waterEnd;
+        }
         updateElement(state.earthStart(), earthStart);
         updateElement(state.earthEnd(), earthEnd);
+        if (state.earthEnd().position().equals(state.earthLast())) {
+            earthCurrent = earthEnd;
+        }
         updateElement(state.airStart(), airStart);
         updateElement(state.airEnd(), airEnd);
+        if (state.airEnd().position().equals(state.airLast())) {
+            airCurrent = airEnd;
+        }
         addStartingPositions(firePreviews, state.fireStartingPositions(), ElementType.FIRE);
         addStartingPositions(waterPreviews, state.waterStartingPositions(), ElementType.WATER);
         addStartingPositions(earthPreviews, state.earthStartingPositions(), ElementType.EARTH);
@@ -80,12 +124,28 @@ public class Board extends WidgetGroup {
         }
         visibleTiles.clear();
         state.tiles().forEach((position, current) -> {
-            Image image = new Image(tile);
-            image.setColor(current.type().color);
+            Image image = new Image(current.type().tileSelector.apply(textures));
             image.setPosition(position.x * TILE_SIZE, position.y * TILE_SIZE);
+            image.setOrigin(Align.center);
             addActor(image);
             visibleTiles.add(image);
+            if (state.fireLast().equals(position)) {
+                fireCurrent = image;
+            }
+            if (state.waterLast().equals(position)) {
+                waterCurrent = image;
+            }
+            if (state.earthLast().equals(position)) {
+                earthCurrent = image;
+            }
+            if (state.airLast().equals(position)) {
+                airCurrent = image;
+            }
         });
+        fireCurrent.addAction(highlightAction());
+        waterCurrent.addAction(highlightAction());
+        earthCurrent.addAction(highlightAction());
+        airCurrent.addAction(highlightAction());
     }
 
     private void addStartingPositions(List<Image> previews, List<GridPoint2> startingPositions, ElementType type) {
@@ -114,10 +174,9 @@ public class Board extends WidgetGroup {
         }
     }
 
-    private Image createButton(TextureRegion element, ElementType type) {
+    private Image createButton(TextureRegion element) {
         final Image button;
         button = new Image(element);
-        button.setColor(type.color);
         button.setVisible(false);
         return button;
     }
@@ -149,13 +208,13 @@ public class Board extends WidgetGroup {
         @Override
         public void enter(Board board) {
             fireListener = createListener(board, ElementType.FIRE);
-            board.fireEnd.addListener(fireListener);
+            board.fireCurrent.addListener(fireListener);
             waterListener = createListener(board, ElementType.WATER);
-            board.waterEnd.addListener(waterListener);
+            board.waterCurrent.addListener(waterListener);
             earthListener = createListener(board, ElementType.EARTH);
-            board.earthEnd.addListener(earthListener);
+            board.earthCurrent.addListener(earthListener);
             airListener = createListener(board, ElementType.AIR);
-            board.airEnd.addListener(airListener);
+            board.airCurrent.addListener(airListener);
         }
 
         private ClickListener createListener(Board board, final ElementType type) {
@@ -169,10 +228,10 @@ public class Board extends WidgetGroup {
 
         @Override
         public void exit(Board board) {
-            board.fireEnd.removeListener(fireListener);
-            board.waterEnd.removeListener(waterListener);
-            board.earthEnd.removeListener(earthListener);
-            board.airEnd.removeListener(airListener);
+            board.fireCurrent.removeListener(fireListener);
+            board.waterCurrent.removeListener(waterListener);
+            board.earthCurrent.removeListener(earthListener);
+            board.airCurrent.removeListener(airListener);
         }
     }
 
@@ -181,6 +240,8 @@ public class Board extends WidgetGroup {
         private final Vector2 screenCoords = new Vector2();
         private final ElementType type;
         private ClickListener listener;
+        private ClickListener removeListener;
+        private ClickListener cancelListener;
 
         public PlaceTile(ElementType type) {
             super();
@@ -192,17 +253,55 @@ public class Board extends WidgetGroup {
             listener = new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
-                    board.stateMachine.changeState(new Selection());
                     Actor target = event.getTarget();
                     Vector2 positionOnBoard = ElementPosition.positionOnBoard(
                             board.getStage().getViewport(), screenCoords.set(target.getX(), target.getY()));
                     board.listener.onElementPlaced(
                             type, new GridPoint2((int) positionOnBoard.x, (int) positionOnBoard.y));
+                    goToSelection(board);
                 }
             };
             for (Image preview : previews(board)) {
                 preview.setVisible(true);
                 preview.addListener(listener);
+            }
+            removeListener = new ClickListener(Input.Buttons.RIGHT) {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    Actor target = event.getTarget();
+                    Vector2 positionOnBoard = ElementPosition.positionOnBoard(
+                            board.getStage().getViewport(), screenCoords.set(target.getX(), target.getY()));
+
+                    board.listener.onElementRemoved(new GridPoint2((int) positionOnBoard.x, (int) positionOnBoard.y));
+                    goToSelection(board);
+                }
+            };
+            current(board).addListener(removeListener);
+            cancelListener = new ClickListener(Input.Buttons.RIGHT) {
+                @Override
+                public void clicked(InputEvent event, float x, float y) {
+                    goToSelection(board);
+                }
+            };
+            board.addListener(cancelListener);
+        }
+
+        private void goToSelection(Board board) {
+            board.stateMachine.changeState(new Selection());
+        }
+
+        private Image current(Board board) {
+            switch (type) {
+                case FIRE:
+                    return board.fireCurrent;
+                case WATER:
+                    return board.waterCurrent;
+                case EARTH:
+                    return board.earthCurrent;
+                case AIR:
+                    return board.airCurrent;
+                default:
+                    throw new IllegalStateException("Element type unrecognized " + type);
             }
         }
 
@@ -227,6 +326,8 @@ public class Board extends WidgetGroup {
                 preview.setVisible(false);
                 preview.removeListener(listener);
             }
+            current(board).removeListener(removeListener);
+            board.removeListener(cancelListener);
         }
     }
 
@@ -238,5 +339,7 @@ public class Board extends WidgetGroup {
 
     public interface Listener {
         void onElementPlaced(ElementType type, GridPoint2 position);
+
+        void onElementRemoved(GridPoint2 position);
     }
 }

@@ -61,6 +61,36 @@ public abstract class State {
         return results;
     }
 
+    public boolean gameWon() {
+        return fireComplete() && waterComplete() && earthComplete() && airComplete();
+    }
+
+    public boolean fireComplete() {
+        return areAdjacent(fireStart(), fireLast());
+    }
+
+    public boolean waterComplete() {
+        return areAdjacent(waterStart(), waterLast());
+    }
+
+    public boolean earthComplete() {
+        return areAdjacent(earthStart(), earthLast());
+    }
+
+    public boolean airComplete() {
+        return areAdjacent(airStart(), airLast());
+    }
+
+    private boolean areAdjacent(Element startElement, GridPoint2 last) {
+        int x = last.x;
+        int y = last.y;
+        GridPoint2 start = startElement.position();
+        return (start.x == x && start.y == y - 1
+                || start.x == x && start.y == y + 1
+                || start.x == x - 1 && start.y == y
+                || start.x == x + 1 && start.y == y);
+    }
+
     private void addPositions(Element start, Element end, GridPoint2 last, List<GridPoint2> results) {
         if (!start.visible() || !end.visible()) {
             return;
@@ -96,6 +126,68 @@ public abstract class State {
                 && !airStart().position().equals(candidate)
                 && !airEnd().position().equals(candidate)
                 && !tiles().containsKey(candidate);
+    }
+
+    public State remove(GridPoint2 position) {
+        Tile tile = tiles().get(position);
+        if (tile == null) {
+            return this;
+        }
+        GridPoint2 adjPosition = position.cpy();
+        ElementType type = tile.type();
+        Tile candidate = adj(adjPosition.set(position.x, position.y - 1), type);
+        HashMap<GridPoint2, Tile> newTiles = new HashMap<>(tiles());
+        newTiles.remove(position);
+        Builder builder = builder().tiles(newTiles);
+        if (candidate != null) {
+            return updateLastPosition(type, adjPosition, builder);
+        }
+        candidate = adj(adjPosition.set(position.x, position.y + 1), type);
+        if (candidate != null) {
+            return updateLastPosition(type, adjPosition, builder);
+        }
+        candidate = adj(adjPosition.set(position.x - 1, position.y), type);
+        if (candidate != null) {
+            return updateLastPosition(type, adjPosition, builder);
+        }
+        candidate = adj(adjPosition.set(position.x + 1, position.y), type);
+        if (candidate != null) {
+            return updateLastPosition(type, adjPosition, builder);
+        }
+        switch (type) {
+            case FIRE:
+                return builder.fireLast(fireEnd().position()).build();
+            case WATER:
+                return builder.waterLast(waterEnd().position()).build();
+            case EARTH:
+                return builder.earthLast(earthEnd().position()).build();
+            case AIR:
+                return builder.airLast(airEnd().position()).build();
+        }
+        return this;
+    }
+
+    private State updateLastPosition(ElementType type, GridPoint2 adjPosition, State.Builder builder) {
+        switch (type) {
+            case FIRE:
+                return builder.fireLast(adjPosition).build();
+            case WATER:
+                return builder.waterLast(adjPosition).build();
+            case EARTH:
+                return builder.earthLast(adjPosition).build();
+            case AIR:
+                return builder.airLast(adjPosition).build();
+            default:
+                throw new IllegalStateException("Invalid tile type");
+        }
+    }
+
+    private Tile adj(GridPoint2 adjPosition, ElementType type) {
+        Tile candidate = tiles().get(adjPosition);
+        if (candidate == null || !candidate.type().equals(type)) {
+            return null;
+        }
+        return candidate;
     }
 
     public State add(ElementType type, GridPoint2 position) {
@@ -165,6 +257,26 @@ public abstract class State {
             default:
                 return this;
         }
+    }
+
+    public static State game(
+            GridPoint2 fireStart,
+            GridPoint2 fireEnd,
+            GridPoint2 waterStart,
+            GridPoint2 waterEnd,
+            GridPoint2 earthStart,
+            GridPoint2 earthEnd,
+            GridPoint2 airStart,
+            GridPoint2 airEnd) {
+        return initial()
+                .add(ElementType.FIRE, fireStart)
+                .add(ElementType.FIRE, fireEnd)
+                .add(ElementType.WATER, waterStart)
+                .add(ElementType.WATER, waterEnd)
+                .add(ElementType.EARTH, earthStart)
+                .add(ElementType.EARTH, earthEnd)
+                .add(ElementType.AIR, airStart)
+                .add(ElementType.AIR, airEnd);
     }
 
     public static State initial() {
