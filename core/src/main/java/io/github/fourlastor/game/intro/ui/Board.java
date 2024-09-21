@@ -24,15 +24,19 @@ public class Board extends WidgetGroup {
 
     private final Image fireStart;
     private final Image fireEnd;
+    private Image fireCurrent;
     private final List<Image> firePreviews = new ArrayList<>();
     private final Image waterStart;
     private final Image waterEnd;
+    private Image waterCurrent;
     private final List<Image> waterPreviews = new ArrayList<>();
     private final Image earthStart;
     private final Image earthEnd;
+    private Image earthCurrent;
     private final List<Image> earthPreviews = new ArrayList<>();
     private final Image airStart;
     private final Image airEnd;
+    private Image airCurrent;
     private final List<Image> airPreviews = new ArrayList<>();
     private final List<Image> visibleTiles = new ArrayList<>();
     private final StateMachine stateMachine;
@@ -47,12 +51,16 @@ public class Board extends WidgetGroup {
         setFillParent(true);
         fireStart = createButton(textures.fireElement);
         fireEnd = createButton(textures.fireTile);
+        fireCurrent = fireEnd;
         waterStart = createButton(textures.waterElement);
         waterEnd = createButton(textures.waterTile);
+        waterCurrent = waterEnd;
         earthStart = createButton(textures.earthElement);
         earthEnd = createButton(textures.earthTile);
+        earthCurrent = earthEnd;
         airStart = createButton(textures.airElement);
         airEnd = createButton(textures.airTile);
+        airCurrent = airEnd;
         addActor(fireStart);
         addActor(fireEnd);
         addActor(waterStart);
@@ -84,10 +92,21 @@ public class Board extends WidgetGroup {
         visibleTiles.clear();
         state.tiles().forEach((position, current) -> {
             Image image = new Image(current.type().tileSelector.apply(textures));
-            //            image.setColor(current.type().color);
             image.setPosition(position.x * TILE_SIZE, position.y * TILE_SIZE);
             addActor(image);
             visibleTiles.add(image);
+            if (state.fireLast() == position) {
+                fireCurrent = image;
+            }
+            if (state.waterLast() == position) {
+                waterCurrent = image;
+            }
+            if (state.earthLast() == position) {
+                earthCurrent = image;
+            }
+            if (state.airLast() == position) {
+                airCurrent = image;
+            }
         });
     }
 
@@ -151,13 +170,13 @@ public class Board extends WidgetGroup {
         @Override
         public void enter(Board board) {
             fireListener = createListener(board, ElementType.FIRE);
-            board.fireEnd.addListener(fireListener);
+            board.fireCurrent.addListener(fireListener);
             waterListener = createListener(board, ElementType.WATER);
-            board.waterEnd.addListener(waterListener);
+            board.waterCurrent.addListener(waterListener);
             earthListener = createListener(board, ElementType.EARTH);
-            board.earthEnd.addListener(earthListener);
+            board.earthCurrent.addListener(earthListener);
             airListener = createListener(board, ElementType.AIR);
-            board.airEnd.addListener(airListener);
+            board.airCurrent.addListener(airListener);
         }
 
         private ClickListener createListener(Board board, final ElementType type) {
@@ -171,10 +190,10 @@ public class Board extends WidgetGroup {
 
         @Override
         public void exit(Board board) {
-            board.fireEnd.removeListener(fireListener);
-            board.waterEnd.removeListener(waterListener);
-            board.earthEnd.removeListener(earthListener);
-            board.airEnd.removeListener(airListener);
+            board.fireCurrent.removeListener(fireListener);
+            board.waterCurrent.removeListener(waterListener);
+            board.earthCurrent.removeListener(earthListener);
+            board.airCurrent.removeListener(airListener);
         }
     }
 
@@ -194,12 +213,12 @@ public class Board extends WidgetGroup {
             listener = new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
-                    board.stateMachine.changeState(new Selection());
                     Actor target = event.getTarget();
                     Vector2 positionOnBoard = ElementPosition.positionOnBoard(
                             board.getStage().getViewport(), screenCoords.set(target.getX(), target.getY()));
                     board.listener.onElementPlaced(
                             type, new GridPoint2((int) positionOnBoard.x, (int) positionOnBoard.y));
+                    board.stateMachine.changeState(new Selection());
                 }
             };
             for (Image preview : previews(board)) {
