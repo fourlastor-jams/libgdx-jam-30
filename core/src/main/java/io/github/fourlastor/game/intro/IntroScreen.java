@@ -13,6 +13,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.GridPoint2;
+import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.Touchable;
 import com.badlogic.gdx.scenes.scene2d.actions.Actions;
@@ -134,12 +135,13 @@ public class IntroScreen extends ScreenAdapter {
                 SequenceAction sequence = Actions.sequence();
                 for (int i = 0; i < difference; i++) {
                     float pitch = 1 + (i / 10f);
+                    float delay = MathUtils.clamp(0.2f - (i / 15f), 0.1f, 0.2f);
                     sequence.addAction(Actions.run(() -> sound.play(
                             Perceptual.perceptualToAmplitude(0.5f),
                             pitch,
                             0
                     )));
-                    sequence.addAction(Actions.delay(0.2f));
+                    sequence.addAction(Actions.delay(delay));
                 }
                 stage.addAction(sequence);
             }
