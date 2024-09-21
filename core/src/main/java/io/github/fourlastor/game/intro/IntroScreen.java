@@ -7,6 +7,7 @@ import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Align;
@@ -29,7 +30,16 @@ public class IntroScreen extends ScreenAdapter {
     private final Stage stage;
     private final Viewport viewport;
     private final InputMultiplexer multiplexer;
-    private final StateContainer<State> stateContainer = new StateContainer<>(State.initial());
+    private final StateContainer<State> stateContainer = new StateContainer<>(State.game(
+            new GridPoint2(0,4), // fs
+            new GridPoint2(3,0), // fe
+            new GridPoint2(1,2), // ws
+            new GridPoint2(3,3), // we
+            new GridPoint2(1,1), // es
+            new GridPoint2(4,0), // ee
+            new GridPoint2(1,4), // as
+            new GridPoint2(2,2)  // ae
+    ));
 
     @Inject
     public IntroScreen(@Named(WHITE_PIXEL) TextureRegion whitePixel, TextureAtlas atlas, InputMultiplexer multiplexer) {

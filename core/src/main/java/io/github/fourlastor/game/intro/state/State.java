@@ -167,6 +167,28 @@ public abstract class State {
         }
     }
 
+    public static State game(
+            GridPoint2 fireStart,
+            GridPoint2 fireEnd,
+            GridPoint2 waterStart,
+            GridPoint2 waterEnd,
+            GridPoint2 earthStart,
+            GridPoint2 earthEnd,
+            GridPoint2 airStart,
+            GridPoint2 airEnd
+    ) {
+        return initial()
+                .add(ElementType.FIRE, fireStart)
+                .add(ElementType.FIRE, fireEnd)
+                .add(ElementType.WATER, waterStart)
+                .add(ElementType.WATER, waterEnd)
+                .add(ElementType.EARTH, earthStart)
+                .add(ElementType.EARTH, earthEnd)
+                .add(ElementType.AIR, airStart)
+                .add(ElementType.AIR, airEnd)
+        ;
+    }
+
     public static State initial() {
         return new AutoValue_State.Builder()
                 .fireStart(Element.initial())
