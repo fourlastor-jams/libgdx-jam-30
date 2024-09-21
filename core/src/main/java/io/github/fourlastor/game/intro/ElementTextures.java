@@ -12,7 +12,15 @@ public class ElementTextures {
     public final TextureRegion airElement;
     public final TextureRegion airTile;
 
-    public ElementTextures(TextureRegion fireElement, TextureRegion fireTile, TextureRegion waterElement, TextureRegion waterTile, TextureRegion earthElement, TextureRegion earthTile, TextureRegion airElement, TextureRegion airTile) {
+    public ElementTextures(
+            TextureRegion fireElement,
+            TextureRegion fireTile,
+            TextureRegion waterElement,
+            TextureRegion waterTile,
+            TextureRegion earthElement,
+            TextureRegion earthTile,
+            TextureRegion airElement,
+            TextureRegion airTile) {
         this.fireElement = fireElement;
         this.fireTile = fireTile;
         this.waterElement = waterElement;

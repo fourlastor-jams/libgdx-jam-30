@@ -30,15 +30,15 @@ public class IntroScreen extends ScreenAdapter {
     private final Viewport viewport;
     private final InputMultiplexer multiplexer;
     private final StateContainer<State> stateContainer = new StateContainer<>(State.game(
-            new GridPoint2(0,4), // fs
-            new GridPoint2(3,0), // fe
-            new GridPoint2(1,2), // ws
-            new GridPoint2(3,3), // we
-            new GridPoint2(1,1), // es
-            new GridPoint2(4,0), // ee
-            new GridPoint2(1,4), // as
-            new GridPoint2(2,2)  // ae
-    ));
+            new GridPoint2(0, 4), // fs
+            new GridPoint2(3, 0), // fe
+            new GridPoint2(1, 2), // ws
+            new GridPoint2(3, 3), // we
+            new GridPoint2(1, 1), // es
+            new GridPoint2(4, 0), // ee
+            new GridPoint2(1, 4), // as
+            new GridPoint2(2, 2) // ae
+            ));
 
     @Inject
     public IntroScreen(@Named(WHITE_PIXEL) TextureRegion whitePixel, TextureAtlas atlas, InputMultiplexer multiplexer) {
@@ -61,11 +61,10 @@ public class IntroScreen extends ScreenAdapter {
                 atlas.findRegion("elements/earth-element"),
                 atlas.findRegion("elements/earth-tile"),
                 atlas.findRegion("elements/air-element"),
-                atlas.findRegion("elements/air-tile")
-        );
+                atlas.findRegion("elements/air-tile"));
         TextureAtlas.AtlasRegion tile = atlas.findRegion("elements/tile");
-        Board board =
-                new Board(elementTextures, tile, ((type, position) -> stateContainer.update(it -> it.add(type, position))));
+        Board board = new Board(
+                elementTextures, tile, ((type, position) -> stateContainer.update(it -> it.add(type, position))));
         stage.addActor(board);
         stateContainer.listen(board::update);
         stateContainer.distinct(State::gameWon).listen(state -> {

@@ -65,20 +65,17 @@ public abstract class State {
         return areAdjacent(fireStart(), fireLast())
                 && areAdjacent(waterStart(), waterLast())
                 && areAdjacent(earthStart(), earthLast())
-                && areAdjacent(airStart(), airLast())
-        ;
+                && areAdjacent(airStart(), airLast());
     }
 
     private boolean areAdjacent(Element startElement, GridPoint2 last) {
         int x = last.x;
         int y = last.y;
         GridPoint2 start = startElement.position();
-        return (
-                start.x == x && start.y == y - 1
-                        || start.x == x && start.y == y + 1
-                        || start.x == x - 1 && start.y == y
-                        || start.x == x + 1 && start.y == y
-        );
+        return (start.x == x && start.y == y - 1
+                || start.x == x && start.y == y + 1
+                || start.x == x - 1 && start.y == y
+                || start.x == x + 1 && start.y == y);
     }
 
     private void addPositions(Element start, Element end, GridPoint2 last, List<GridPoint2> results) {
@@ -195,8 +192,7 @@ public abstract class State {
             GridPoint2 earthStart,
             GridPoint2 earthEnd,
             GridPoint2 airStart,
-            GridPoint2 airEnd
-    ) {
+            GridPoint2 airEnd) {
         return initial()
                 .add(ElementType.FIRE, fireStart)
                 .add(ElementType.FIRE, fireEnd)
@@ -205,8 +201,7 @@ public abstract class State {
                 .add(ElementType.EARTH, earthStart)
                 .add(ElementType.EARTH, earthEnd)
                 .add(ElementType.AIR, airStart)
-                .add(ElementType.AIR, airEnd)
-        ;
+                .add(ElementType.AIR, airEnd);
     }
 
     public static State initial() {

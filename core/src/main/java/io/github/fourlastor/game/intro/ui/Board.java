@@ -83,9 +83,8 @@ public class Board extends WidgetGroup {
         }
         visibleTiles.clear();
         state.tiles().forEach((position, current) -> {
-
             Image image = new Image(current.type().tileSelector.apply(textures));
-//            image.setColor(current.type().color);
+            //            image.setColor(current.type().color);
             image.setPosition(position.x * TILE_SIZE, position.y * TILE_SIZE);
             addActor(image);
             visibleTiles.add(image);

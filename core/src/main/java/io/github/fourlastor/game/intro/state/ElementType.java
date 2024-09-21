@@ -3,7 +3,6 @@ package io.github.fourlastor.game.intro.state;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import io.github.fourlastor.game.intro.ElementTextures;
-
 import java.util.function.Function;
 
 public enum ElementType {
