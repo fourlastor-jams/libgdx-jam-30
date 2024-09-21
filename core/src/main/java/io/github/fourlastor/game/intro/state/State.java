@@ -247,15 +247,15 @@ public abstract class State {
                 .airLast(airEnd)
                 .tiles(new HashMap<>())
                 .build();
-//        return initial()
-//                .add(ElementType.FIRE, fireStart)
-//                .add(ElementType.FIRE, fireEnd)
-//                .add(ElementType.WATER, waterStart)
-//                .add(ElementType.WATER, waterEnd)
-//                .add(ElementType.EARTH, earthStart)
-//                .add(ElementType.EARTH, earthEnd)
-//                .add(ElementType.AIR, airStart)
-//                .add(ElementType.AIR, airEnd);
+        //        return initial()
+        //                .add(ElementType.FIRE, fireStart)
+        //                .add(ElementType.FIRE, fireEnd)
+        //                .add(ElementType.WATER, waterStart)
+        //                .add(ElementType.WATER, waterEnd)
+        //                .add(ElementType.EARTH, earthStart)
+        //                .add(ElementType.EARTH, earthEnd)
+        //                .add(ElementType.AIR, airStart)
+        //                .add(ElementType.AIR, airEnd);
     }
 
     public static State initial() {

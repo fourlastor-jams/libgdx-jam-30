@@ -17,6 +17,7 @@ public abstract class Element {
     public static Element initial() {
         return new AutoValue_Element.Builder().position(NO_VALUE).build();
     }
+
     public static Element on(GridPoint2 position) {
         return new AutoValue_Element.Builder().position(position).build();
     }
