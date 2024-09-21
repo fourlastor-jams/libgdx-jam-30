@@ -129,6 +129,7 @@ public class IntroScreen extends ScreenAdapter {
         waterSound = assetManager.get(AssetsModule.WATER_PATH);
         earthSound = assetManager.get(AssetsModule.EARTH_PATH);
         airSound = assetManager.get(AssetsModule.AIR_PATH);
+        Sound delete = assetManager.get(AssetsModule.DELETE_PATH);
         stateContainer.distinct(State::tiles).listen(state -> {
             int tilesSize = state.tiles().size();
             int difference = tilesSize - tilesCount;
@@ -142,6 +143,8 @@ public class IntroScreen extends ScreenAdapter {
                     sequence.addAction(Actions.delay(delay));
                 }
                 stage.addAction(sequence);
+            } else if (difference < 0) {
+                delete.play();
             }
             tilesCount = tilesSize;
         });

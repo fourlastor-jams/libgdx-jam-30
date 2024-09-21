@@ -20,6 +20,7 @@ public class AssetsModule {
     public static final String WATER_PATH = "audio/sounds/water.ogg";
     public static final String EARTH_PATH = "audio/sounds/earth.ogg";
     public static final String AIR_PATH = "audio/sounds/air.ogg";
+    public static final String DELETE_PATH = "audio/sounds/delete.ogg";
 
     @Provides
     @Singleton
@@ -31,6 +32,7 @@ public class AssetsModule {
         assetManager.load(WATER_PATH, Sound.class);
         assetManager.load(EARTH_PATH, Sound.class);
         assetManager.load(AIR_PATH, Sound.class);
+        assetManager.load(DELETE_PATH, Sound.class);
         assetManager.finishLoading();
         return assetManager;
     }
