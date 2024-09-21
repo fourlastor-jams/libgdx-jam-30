@@ -43,7 +43,7 @@ public class IntroScreen extends ScreenAdapter {
     @Inject
     public IntroScreen(@Named(WHITE_PIXEL) TextureRegion whitePixel, TextureAtlas atlas, InputMultiplexer multiplexer) {
         this.multiplexer = multiplexer;
-        viewport = new FitViewport(Config.TILE_SIZE * Config.TILE_COUNT, Config.TILE_SIZE * (Config.TILE_COUNT + 3));
+        viewport = new FitViewport(Config.TILE_SIZE * Config.TILE_COUNT, Config.TILE_SIZE * Config.TILE_COUNT);
         stage = new Stage(viewport);
         ShapeDrawer shapeDrawer = new ShapeDrawer(stage.getBatch(), whitePixel);
         Image bg = new Image(whitePixel);
