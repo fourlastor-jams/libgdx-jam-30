@@ -29,10 +29,9 @@ import io.github.fourlastor.game.intro.state.State;
 import io.github.fourlastor.game.intro.ui.Board;
 import io.github.fourlastor.game.route.Router;
 import io.github.fourlastor.game.state.StateContainer;
+import io.github.fourlastor.perceptual.Perceptual;
 import javax.inject.Inject;
 import javax.inject.Named;
-
-import io.github.fourlastor.perceptual.Perceptual;
 import space.earlygrey.shapedrawer.ShapeDrawer;
 import space.earlygrey.shapedrawer.scene2d.ShapeDrawerDrawable;
 
@@ -63,7 +62,8 @@ public class IntroScreen extends ScreenAdapter {
             AssetManager assetManager) {
         this.multiplexer = multiplexer;
         this.router = router;
-        viewport = new FitViewport(Config.TILE_SIZE * Config.TILE_COUNT, Config.TILE_SIZE * Config.TILE_COUNT);
+        viewport =
+                new FitViewport(Config.TILE_SIZE * (Config.TILE_COUNT + 2), Config.TILE_SIZE * (Config.TILE_COUNT + 2));
         stage = new Stage(viewport);
         ShapeDrawer shapeDrawer = new ShapeDrawer(stage.getBatch(), whitePixel);
         Image bg = new Image(whitePixel);
@@ -71,8 +71,9 @@ public class IntroScreen extends ScreenAdapter {
         bg.setColor(new Color(0x333333ff));
         stage.addActor(bg);
         Image image = createGrid(shapeDrawer);
-        image.setPosition(stage.getWidth() / 2, 0, Align.center | Align.bottom);
         stage.addActor(image);
+        Image walls = new Image(atlas.findRegion("walls"));
+        stage.addActor(walls);
         ElementTextures elementTextures = new ElementTextures(
                 atlas.findRegion("elements/fire-element"),
                 atlas.findRegion("elements/fire-tile"),
@@ -96,6 +97,7 @@ public class IntroScreen extends ScreenAdapter {
                 stateContainer.update(it -> it.remove(position));
             }
         });
+        board.setPosition(Config.TILE_SIZE, Config.TILE_SIZE);
         TextureAtlas.AtlasRegion winTexture = atlas.findRegion("win_condition_text");
         Image winConditionText = new Image(winTexture);
         float scale = ((float) Config.TILE_COUNT * Config.TILE_SIZE) / winTexture.getRegionWidth();
@@ -136,11 +138,7 @@ public class IntroScreen extends ScreenAdapter {
                 for (int i = 0; i < difference; i++) {
                     float pitch = 1 + (i / 10f);
                     float delay = MathUtils.clamp(0.2f - (i / 15f), 0.1f, 0.2f);
-                    sequence.addAction(Actions.run(() -> sound.play(
-                            Perceptual.perceptualToAmplitude(0.5f),
-                            pitch,
-                            0
-                    )));
+                    sequence.addAction(Actions.run(() -> sound.play(Perceptual.perceptualToAmplitude(0.5f), pitch, 0)));
                     sequence.addAction(Actions.delay(delay));
                 }
                 stage.addAction(sequence);
@@ -190,6 +188,7 @@ public class IntroScreen extends ScreenAdapter {
             }
         });
         image.setSize(Config.TILE_SIZE * Config.TILE_COUNT, Config.TILE_SIZE * Config.TILE_COUNT);
+        image.setPosition(Config.TILE_SIZE, Config.TILE_SIZE);
         return image;
     }
 
@@ -202,7 +201,7 @@ public class IntroScreen extends ScreenAdapter {
     public void show() {
         super.show();
         multiplexer.addProcessor(stage);
-//        music.play();
+        //        music.play();
     }
 
     @Override

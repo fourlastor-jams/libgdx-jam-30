@@ -1,5 +1,6 @@
 package io.github.fourlastor.game.intro.ui;
 
+import static io.github.fourlastor.game.intro.Config.TILE_COUNT;
 import static io.github.fourlastor.game.intro.Config.TILE_SIZE;
 
 import com.badlogic.gdx.Input;
@@ -53,7 +54,7 @@ public class Board extends WidgetGroup {
         this.textures = textures;
         this.tile = tile;
         this.listener = listener;
-        setFillParent(true);
+        setSize(TILE_SIZE * TILE_COUNT, TILE_SIZE * TILE_COUNT);
         fireStart = createButton(textures.fireElement);
         fireEnd = createButton(textures.fireTile);
         fireEnd.setOrigin(Align.center);
