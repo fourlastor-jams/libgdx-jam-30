@@ -2,6 +2,8 @@ package io.github.fourlastor.game.intro.ui;
 
 import static io.github.fourlastor.game.intro.Config.TILE_SIZE;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ai.fsm.DefaultStateMachine;
 import com.badlogic.gdx.ai.msg.Telegram;
 import com.badlogic.gdx.graphics.Color;
@@ -213,18 +215,25 @@ public class Board extends WidgetGroup {
             listener = new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
+                    if (event.getButton() != Input.Buttons.LEFT) {
+                        return;
+                    }
                     Actor target = event.getTarget();
                     Vector2 positionOnBoard = ElementPosition.positionOnBoard(
                             board.getStage().getViewport(), screenCoords.set(target.getX(), target.getY()));
                     board.listener.onElementPlaced(
                             type, new GridPoint2((int) positionOnBoard.x, (int) positionOnBoard.y));
-                    board.stateMachine.changeState(new Selection());
+                    goToSelection(board);
                 }
             };
             for (Image preview : previews(board)) {
                 preview.setVisible(true);
                 preview.addListener(listener);
             }
+        }
+
+        private void goToSelection(Board board) {
+            board.stateMachine.changeState(new Selection());
         }
 
         private List<Image> previews(Board board) {
@@ -239,6 +248,14 @@ public class Board extends WidgetGroup {
                     return board.airPreviews;
                 default:
                     throw new IllegalStateException("Element type unrecognized " + type);
+            }
+        }
+
+        @Override
+        public void update(Board board) {
+            super.update(board);
+            if (Gdx.input.isButtonJustPressed(Input.Buttons.RIGHT)) {
+                goToSelection(board);
             }
         }
 
