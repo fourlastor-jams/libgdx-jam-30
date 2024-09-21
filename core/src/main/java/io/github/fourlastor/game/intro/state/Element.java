@@ -8,8 +8,6 @@ public abstract class Element {
 
     private static final GridPoint2 NO_VALUE = new GridPoint2(-1, -1);
 
-    public abstract Builder builder();
-
     public abstract GridPoint2 position();
 
     public boolean visible() {
@@ -18,6 +16,9 @@ public abstract class Element {
 
     public static Element initial() {
         return new AutoValue_Element.Builder().position(NO_VALUE).build();
+    }
+    public static Element on(GridPoint2 position) {
+        return new AutoValue_Element.Builder().position(position).build();
     }
 
     @AutoValue.Builder
