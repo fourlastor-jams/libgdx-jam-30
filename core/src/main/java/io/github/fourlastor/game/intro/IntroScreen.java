@@ -2,6 +2,8 @@ package io.github.fourlastor.game.intro;
 
 import static io.github.fourlastor.game.di.modules.AssetsModule.WHITE_PIXEL;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Color;
@@ -16,6 +18,7 @@ import com.badlogic.gdx.utils.viewport.FitViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import io.github.fourlastor.game.intro.state.State;
 import io.github.fourlastor.game.intro.ui.Board;
+import io.github.fourlastor.game.route.Router;
 import io.github.fourlastor.game.state.StateContainer;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -29,6 +32,7 @@ public class IntroScreen extends ScreenAdapter {
     private final Stage stage;
     private final Viewport viewport;
     private final InputMultiplexer multiplexer;
+    private final Router router;
     private final StateContainer<State> stateContainer = new StateContainer<>(State.game(
             new GridPoint2(0, 4), // fs
             new GridPoint2(3, 0), // fe
@@ -41,8 +45,12 @@ public class IntroScreen extends ScreenAdapter {
             ));
 
     @Inject
-    public IntroScreen(@Named(WHITE_PIXEL) TextureRegion whitePixel, TextureAtlas atlas, InputMultiplexer multiplexer) {
+    public IntroScreen(@Named(WHITE_PIXEL) TextureRegion whitePixel,
+                       TextureAtlas atlas,
+                       InputMultiplexer multiplexer,
+                       Router router) {
         this.multiplexer = multiplexer;
+        this.router = router;
         viewport = new FitViewport(Config.TILE_SIZE * Config.TILE_COUNT, Config.TILE_SIZE * Config.TILE_COUNT);
         stage = new Stage(viewport);
         ShapeDrawer shapeDrawer = new ShapeDrawer(stage.getBatch(), whitePixel);
@@ -116,6 +124,9 @@ public class IntroScreen extends ScreenAdapter {
         ScreenUtils.clear(CLEAR_COLOR, true);
         stage.act(delta);
         stage.draw();
+        if (Gdx.input.isKeyJustPressed(Input.Keys.R)) {
+            router.goToIntro();
+        }
     }
 
     @Override
