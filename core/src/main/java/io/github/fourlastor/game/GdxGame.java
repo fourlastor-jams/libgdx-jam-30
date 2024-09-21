@@ -23,9 +23,7 @@ public class GdxGame extends Game implements Router {
     private Screen pendingScreen = null;
 
     @Inject
-    public GdxGame(
-            InputMultiplexer multiplexer,
-            IntroComponent.Builder introScreenFactory) {
+    public GdxGame(InputMultiplexer multiplexer, IntroComponent.Builder introScreenFactory) {
         this.multiplexer = multiplexer;
         this.introScreenFactory = introScreenFactory;
         Harlequin.LIST_CREATOR = new Harlequin.ListCreator() {
