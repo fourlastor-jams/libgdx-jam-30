@@ -45,7 +45,12 @@ public class IntroScreen extends ScreenAdapter {
     private final Router router;
     private final StateContainer<State> stateContainer;
     private final Music music;
+    private final Sound fireSound;
+    private final Sound waterSound;
+    private final Sound earthSound;
+    private final Sound airSound;
     private int tilesCount = 0;
+    private ElementType lastType = null;
 
     @Inject
     public IntroScreen(
@@ -81,6 +86,7 @@ public class IntroScreen extends ScreenAdapter {
         Board board = new Board(elementTextures, tile, new Board.Listener() {
             @Override
             public void onElementPlaced(ElementType type, GridPoint2 position) {
+                lastType = type;
                 stateContainer.update(it -> it.add(type, position));
             }
 
@@ -116,11 +122,15 @@ public class IntroScreen extends ScreenAdapter {
                 winOverlay.addAction(Actions.alpha(0.5f, 1));
             }
         });
-        Sound sound = assetManager.get(AssetsModule.FIRE_PATH);
+        fireSound = assetManager.get(AssetsModule.FIRE_PATH);
+        waterSound = assetManager.get(AssetsModule.WATER_PATH);
+        earthSound = assetManager.get(AssetsModule.EARTH_PATH);
+        airSound = assetManager.get(AssetsModule.AIR_PATH);
         stateContainer.distinct(State::tiles).listen(state -> {
             int tilesSize = state.tiles().size();
             int difference = tilesSize - tilesCount;
-            if (difference > 0) {
+            if (difference > 0 && lastType != null) {
+                Sound sound = selectSound(lastType);
                 SequenceAction sequence = Actions.sequence();
                 for (int i = 0; i < difference; i++) {
                     float pitch = 1 + (i / 10f);
@@ -129,7 +139,7 @@ public class IntroScreen extends ScreenAdapter {
                             pitch,
                             0
                     )));
-                    sequence.addAction(Actions.delay(0.1f));
+                    sequence.addAction(Actions.delay(0.2f));
                 }
                 stage.addAction(sequence);
             }
@@ -138,6 +148,21 @@ public class IntroScreen extends ScreenAdapter {
         music = assetManager.get(AssetsModule.MUSIC_PATH);
         music.setVolume(Perceptual.perceptualToAmplitude(0.7f));
         music.setLooping(true);
+    }
+
+    private Sound selectSound(ElementType type) {
+        switch (type) {
+            case FIRE:
+                return fireSound;
+            case WATER:
+                return waterSound;
+            case EARTH:
+                return earthSound;
+            case AIR:
+                return airSound;
+            default:
+                throw new IllegalArgumentException("Invalid type");
+        }
     }
 
     private static Image createGrid(ShapeDrawer shapeDrawer) {
