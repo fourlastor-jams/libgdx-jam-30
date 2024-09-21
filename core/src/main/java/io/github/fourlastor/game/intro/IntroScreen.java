@@ -149,7 +149,7 @@ public class IntroScreen extends ScreenAdapter {
             tilesCount = tilesSize;
         });
         music = assetManager.get(AssetsModule.MUSIC_PATH);
-        music.setVolume(Perceptual.perceptualToAmplitude(0.7f));
+        music.setVolume(Perceptual.perceptualToAmplitude(0.4f));
         music.setLooping(true);
     }
 
