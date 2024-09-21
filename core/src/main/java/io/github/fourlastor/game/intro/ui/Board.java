@@ -339,6 +339,7 @@ public class Board extends WidgetGroup {
 
     public interface Listener {
         void onElementPlaced(ElementType type, GridPoint2 position);
+
         void onElementRemoved(GridPoint2 position);
     }
 }
