@@ -98,16 +98,16 @@ public abstract class State {
         GridPoint2 currentCandidate = new GridPoint2(last);
         int x = currentCandidate.x;
         int y = currentCandidate.y;
-        if (spotFree(currentCandidate.set(x - 1, y))) {
+        for (int cx = x - 1; spotFree(currentCandidate.set(cx, y)); cx--) {
             results.add(new GridPoint2(currentCandidate));
         }
-        if (spotFree(currentCandidate.set(x + 1, y))) {
+        for (int cx = x + 1; spotFree(currentCandidate.set(cx, y)); cx++) {
             results.add(new GridPoint2(currentCandidate));
         }
-        if (spotFree(currentCandidate.set(x, y - 1))) {
+        for (int cy = y - 1; spotFree(currentCandidate.set(x, cy)); cy--) {
             results.add(new GridPoint2(currentCandidate));
         }
-        if (spotFree(currentCandidate.set(x, y + 1))) {
+        for (int cy = y + 1; spotFree(currentCandidate.set(x, cy)); cy++) {
             results.add(new GridPoint2(currentCandidate));
         }
     }
