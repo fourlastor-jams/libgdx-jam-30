@@ -11,6 +11,8 @@ import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.GridPoint2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
+import com.badlogic.gdx.scenes.scene2d.Touchable;
+import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.utils.Align;
 import com.badlogic.gdx.utils.ScreenUtils;
@@ -34,23 +36,15 @@ public class IntroScreen extends ScreenAdapter {
     private final Viewport viewport;
     private final InputMultiplexer multiplexer;
     private final Router router;
-    private final StateContainer<State> stateContainer = new StateContainer<>(State.game(
-            new GridPoint2(0, 4), // fs
-            new GridPoint2(3, 0), // fe
-            new GridPoint2(1, 2), // ws
-            new GridPoint2(3, 3), // we
-            new GridPoint2(1, 1), // es
-            new GridPoint2(4, 0), // ee
-            new GridPoint2(1, 4), // as
-            new GridPoint2(2, 2) // ae
-            ));
+    private final StateContainer<State> stateContainer;
 
     @Inject
     public IntroScreen(
             @Named(WHITE_PIXEL) TextureRegion whitePixel,
             TextureAtlas atlas,
             InputMultiplexer multiplexer,
-            Router router) {
+            Router router,
+            LevelGenerator generator) {
         this.multiplexer = multiplexer;
         this.router = router;
         viewport = new FitViewport(Config.TILE_SIZE * Config.TILE_COUNT, Config.TILE_SIZE * Config.TILE_COUNT);
@@ -73,6 +67,7 @@ public class IntroScreen extends ScreenAdapter {
                 atlas.findRegion("elements/air-element"),
                 atlas.findRegion("elements/air-tile"));
         TextureAtlas.AtlasRegion tile = atlas.findRegion("elements/tile");
+        stateContainer = new StateContainer<>(generator.generateLevel());
         Board board = new Board(elementTextures, tile, new Board.Listener() {
             @Override
             public void onElementPlaced(ElementType type, GridPoint2 position) {
@@ -84,11 +79,31 @@ public class IntroScreen extends ScreenAdapter {
                 stateContainer.update(it -> it.remove(position));
             }
         });
+        TextureAtlas.AtlasRegion winTexture = atlas.findRegion("win_condition_text");
+        Image winConditionText = new Image(winTexture);
+        float scale = ((float) Config.TILE_COUNT * Config.TILE_SIZE) / winTexture.getRegionWidth();
+        winConditionText.setPosition(stage.getWidth() / 2f, stage.getHeight() / 2, Align.center);
+        winConditionText.setOrigin(Align.center);
+        winConditionText.setScale(scale);
+        Color winColor = new Color(Color.WHITE);
+        winColor.a = 0;
+        winConditionText.setColor(winColor);
+        winConditionText.setTouchable(Touchable.disabled);
+        Image winOverlay = new Image(atlas.findRegion("whitePixel"));
+        Color overlayColor = new Color(Color.BLACK);
+        overlayColor.a = 0;
+        winOverlay.setColor(overlayColor);
+        winOverlay.setSize(stage.getWidth(), stage.getHeight());
+        winOverlay.setTouchable(Touchable.disabled);
         stage.addActor(board);
+        stage.addActor(winOverlay);
+        stage.addActor(winConditionText);
         stateContainer.listen(board::update);
         stateContainer.distinct(State::gameWon).listen(state -> {
             if (state.gameWon()) {
-                Gdx.app.log("Intro", "YAY GAME WON");
+                board.setTouchable(Touchable.disabled);
+                winConditionText.addAction(Actions.fadeIn(1));
+                winOverlay.addAction(Actions.alpha(0.5f, 1));
             }
         });
     }
