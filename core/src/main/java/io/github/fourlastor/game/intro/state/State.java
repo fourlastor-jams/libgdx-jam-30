@@ -62,10 +62,26 @@ public abstract class State {
     }
 
     public boolean gameWon() {
-        return areAdjacent(fireStart(), fireLast())
-                && areAdjacent(waterStart(), waterLast())
-                && areAdjacent(earthStart(), earthLast())
-                && areAdjacent(airStart(), airLast());
+        return fireComplete()
+                && waterComplete()
+                && earthComplete()
+                && airComplete();
+    }
+
+    public boolean fireComplete() {
+        return areAdjacent(fireStart(), fireLast());
+    }
+
+    public boolean waterComplete() {
+        return areAdjacent(waterStart(), waterLast());
+    }
+
+    public boolean earthComplete() {
+        return areAdjacent(earthStart(), earthLast());
+    }
+
+    public boolean airComplete() {
+        return areAdjacent(airStart(), airLast());
     }
 
     private boolean areAdjacent(Element startElement, GridPoint2 last) {
