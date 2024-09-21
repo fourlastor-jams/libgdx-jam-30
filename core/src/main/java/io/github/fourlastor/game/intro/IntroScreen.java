@@ -53,10 +53,19 @@ public class IntroScreen extends ScreenAdapter {
         Image image = createGrid(shapeDrawer);
         image.setPosition(stage.getWidth() / 2, 0, Align.center | Align.bottom);
         stage.addActor(image);
-        TextureAtlas.AtlasRegion element = atlas.findRegion("elements/element");
+        ElementTextures elementTextures = new ElementTextures(
+                atlas.findRegion("elements/fire-element"),
+                atlas.findRegion("elements/fire-tile"),
+                atlas.findRegion("elements/water-element"),
+                atlas.findRegion("elements/water-tile"),
+                atlas.findRegion("elements/earth-element"),
+                atlas.findRegion("elements/earth-tile"),
+                atlas.findRegion("elements/air-element"),
+                atlas.findRegion("elements/air-tile")
+        );
         TextureAtlas.AtlasRegion tile = atlas.findRegion("elements/tile");
         Board board =
-                new Board(element, tile, ((type, position) -> stateContainer.update(it -> it.add(type, position))));
+                new Board(elementTextures, tile, ((type, position) -> stateContainer.update(it -> it.add(type, position))));
         stage.addActor(board);
         stateContainer.listen(board::update);
         stateContainer.distinct(State::gameWon).listen(state -> {

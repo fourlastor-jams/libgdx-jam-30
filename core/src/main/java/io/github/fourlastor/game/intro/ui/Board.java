@@ -13,6 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.WidgetGroup;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import io.github.fourlastor.game.intro.ElementTextures;
 import io.github.fourlastor.game.intro.state.Element;
 import io.github.fourlastor.game.intro.state.ElementType;
 import io.github.fourlastor.game.intro.state.State;
@@ -35,21 +36,23 @@ public class Board extends WidgetGroup {
     private final List<Image> airPreviews = new ArrayList<>();
     private final List<Image> visibleTiles = new ArrayList<>();
     private final StateMachine stateMachine;
+    private final ElementTextures textures;
     private final TextureRegion tile;
     private final Listener listener;
 
-    public Board(TextureRegion element, TextureRegion tile, Listener listener) {
+    public Board(ElementTextures textures, TextureRegion tile, Listener listener) {
+        this.textures = textures;
         this.tile = tile;
         this.listener = listener;
         setFillParent(true);
-        fireStart = createButton(element, ElementType.FIRE);
-        fireEnd = createButton(tile, ElementType.FIRE);
-        waterStart = createButton(element, ElementType.WATER);
-        waterEnd = createButton(tile, ElementType.WATER);
-        earthStart = createButton(element, ElementType.EARTH);
-        earthEnd = createButton(tile, ElementType.EARTH);
-        airStart = createButton(element, ElementType.AIR);
-        airEnd = createButton(tile, ElementType.AIR);
+        fireStart = createButton(textures.fireElement);
+        fireEnd = createButton(textures.fireTile);
+        waterStart = createButton(textures.waterElement);
+        waterEnd = createButton(textures.waterTile);
+        earthStart = createButton(textures.earthElement);
+        earthEnd = createButton(textures.earthTile);
+        airStart = createButton(textures.airElement);
+        airEnd = createButton(textures.airTile);
         addActor(fireStart);
         addActor(fireEnd);
         addActor(waterStart);
@@ -80,8 +83,9 @@ public class Board extends WidgetGroup {
         }
         visibleTiles.clear();
         state.tiles().forEach((position, current) -> {
-            Image image = new Image(tile);
-            image.setColor(current.type().color);
+
+            Image image = new Image(current.type().tileSelector.apply(textures));
+//            image.setColor(current.type().color);
             image.setPosition(position.x * TILE_SIZE, position.y * TILE_SIZE);
             addActor(image);
             visibleTiles.add(image);
@@ -114,10 +118,9 @@ public class Board extends WidgetGroup {
         }
     }
 
-    private Image createButton(TextureRegion element, ElementType type) {
+    private Image createButton(TextureRegion element) {
         final Image button;
         button = new Image(element);
-        button.setColor(type.color);
         button.setVisible(false);
         return button;
     }
