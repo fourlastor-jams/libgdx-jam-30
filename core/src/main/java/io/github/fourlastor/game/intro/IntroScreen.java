@@ -36,23 +36,15 @@ public class IntroScreen extends ScreenAdapter {
     private final Viewport viewport;
     private final InputMultiplexer multiplexer;
     private final Router router;
-    private final StateContainer<State> stateContainer = new StateContainer<>(State.game(
-            new GridPoint2(0, 4), // fs
-            new GridPoint2(3, 0), // fe
-            new GridPoint2(1, 2), // ws
-            new GridPoint2(3, 3), // we
-            new GridPoint2(1, 1), // es
-            new GridPoint2(4, 0), // ee
-            new GridPoint2(1, 4), // as
-            new GridPoint2(2, 2) // ae
-            ));
+    private final StateContainer<State> stateContainer;
 
     @Inject
     public IntroScreen(
             @Named(WHITE_PIXEL) TextureRegion whitePixel,
             TextureAtlas atlas,
             InputMultiplexer multiplexer,
-            Router router) {
+            Router router,
+            LevelGenerator generator) {
         this.multiplexer = multiplexer;
         this.router = router;
         viewport = new FitViewport(Config.TILE_SIZE * Config.TILE_COUNT, Config.TILE_SIZE * Config.TILE_COUNT);
@@ -75,6 +67,7 @@ public class IntroScreen extends ScreenAdapter {
                 atlas.findRegion("elements/air-element"),
                 atlas.findRegion("elements/air-tile"));
         TextureAtlas.AtlasRegion tile = atlas.findRegion("elements/tile");
+        stateContainer = new StateContainer<>(generator.generateLevel());
         Board board = new Board(elementTextures, tile, new Board.Listener() {
             @Override
             public void onElementPlaced(ElementType type, GridPoint2 position) {
