@@ -3,6 +3,10 @@ package io.github.fourlastor.game.client;
 import com.badlogic.gdx.ApplicationListener;
 import com.badlogic.gdx.backends.gwt.GwtApplication;
 import com.badlogic.gdx.backends.gwt.GwtApplicationConfiguration;
+import com.badlogic.gdx.backends.gwt.preloader.Preloader;
+import com.google.gwt.core.client.GWT;
+import com.google.gwt.dom.client.Style;
+import com.google.gwt.user.client.ui.Panel;
 import io.github.fourlastor.game.GdxGame;
 
 public class HtmlLauncher extends GwtApplication {
