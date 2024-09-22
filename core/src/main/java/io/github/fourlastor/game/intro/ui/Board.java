@@ -301,6 +301,7 @@ public class Board extends WidgetGroup {
                 }
             };
             for (Image preview : previews(board)) {
+                preview.clearActions();
                 preview.setVisible(true);
                 preview.getColor().a = PREVIEW_ALPHA;
                 preview.addListener(listener);
