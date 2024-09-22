@@ -7,7 +7,6 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
@@ -44,7 +43,6 @@ public class IntroScreen extends ScreenAdapter {
     private final InputMultiplexer multiplexer;
     private final Router router;
     private final StateContainer<State> stateContainer;
-    private final Music music;
     private final Sound fireSound;
     private final Sound waterSound;
     private final Sound earthSound;
@@ -148,9 +146,6 @@ public class IntroScreen extends ScreenAdapter {
             }
             tilesCount = tilesSize;
         });
-        music = assetManager.get(AssetsModule.MUSIC_PATH);
-        music.setVolume(Perceptual.perceptualToAmplitude(0.4f));
-        music.setLooping(true);
     }
 
     private Sound selectSound(ElementType type) {
@@ -204,7 +199,6 @@ public class IntroScreen extends ScreenAdapter {
     public void show() {
         super.show();
         multiplexer.addProcessor(stage);
-        music.play();
     }
 
     @Override
@@ -219,7 +213,6 @@ public class IntroScreen extends ScreenAdapter {
 
     @Override
     public void hide() {
-        music.stop();
         multiplexer.removeProcessor(stage);
         super.hide();
     }

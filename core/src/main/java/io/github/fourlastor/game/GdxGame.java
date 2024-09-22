@@ -5,11 +5,14 @@ import com.badlogic.gdx.Game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.InputMultiplexer;
 import com.badlogic.gdx.Screen;
+import com.badlogic.gdx.audio.Music;
 import com.github.tommyettinger.ds.ObjectList;
 import io.github.fourlastor.game.di.GameComponent;
+import io.github.fourlastor.game.di.modules.AssetsModule;
 import io.github.fourlastor.game.intro.IntroComponent;
 import io.github.fourlastor.game.route.Router;
 import io.github.fourlastor.harlequin.Harlequin;
+import io.github.fourlastor.perceptual.Perceptual;
 import java.util.List;
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -50,6 +53,10 @@ public class GdxGame extends Game implements Router {
         //        }
         Gdx.input.setInputProcessor(multiplexer);
         Gdx.app.setLogLevel(Application.LOG_DEBUG);
+        Music music = Gdx.audio.newMusic(Gdx.files.internal(AssetsModule.MUSIC_PATH));
+        music.setVolume(Perceptual.perceptualToAmplitude(0.4f));
+        music.setLooping(true);
+        music.play();
         goToIntro();
     }
 
