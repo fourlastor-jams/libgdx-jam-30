@@ -6,6 +6,7 @@ import static io.github.fourlastor.game.intro.Config.TILE_SIZE;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ai.fsm.DefaultStateMachine;
 import com.badlogic.gdx.ai.msg.Telegram;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.GridPoint2;
@@ -23,6 +24,7 @@ import io.github.fourlastor.game.intro.ElementTextures;
 import io.github.fourlastor.game.intro.state.Element;
 import io.github.fourlastor.game.intro.state.ElementType;
 import io.github.fourlastor.game.intro.state.State;
+import io.github.fourlastor.perceptual.Perceptual;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,11 +50,15 @@ public class Board extends WidgetGroup {
     private final StateMachine stateMachine;
     private final ElementTextures textures;
     private final TextureRegion tile;
+    private final Sound clickSound;
+    private final Sound abortSound;
     private final Listener listener;
 
-    public Board(ElementTextures textures, TextureRegion tile, Listener listener) {
+    public Board(ElementTextures textures, TextureRegion tile, Sound clickSound, Sound abortSound, Listener listener) {
         this.textures = textures;
         this.tile = tile;
+        this.clickSound = clickSound;
+        this.abortSound = abortSound;
         this.listener = listener;
         setSize(TILE_SIZE * TILE_COUNT, TILE_SIZE * TILE_COUNT);
         fireStart = createButton(textures.fireElement);
@@ -236,6 +242,7 @@ public class Board extends WidgetGroup {
             return new ClickListener() {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
+                    board.clickSound.play(Perceptual.perceptualToAmplitude(0.3f));
                     board.stateMachine.changeState(new PlaceTile(type));
                 }
             };
@@ -299,6 +306,7 @@ public class Board extends WidgetGroup {
             cancelListener = new ClickListener(Input.Buttons.RIGHT) {
                 @Override
                 public void clicked(InputEvent event, float x, float y) {
+                    board.abortSound.play(Perceptual.perceptualToAmplitude(0.7f));
                     goToSelection(board);
                 }
             };
