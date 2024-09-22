@@ -15,7 +15,7 @@ public class ElementPosition {
         int y = Gdx.input.getY();
         Vector2 unprojected = viewport.unproject(output.set(x, y)).scl(1f / TILE_SIZE);
         return unprojected.set(
-                MathUtils.clamp(MathUtils.floor(unprojected.x), 0f, Config.TILE_COUNT - 1),
-                MathUtils.clamp(MathUtils.floor(unprojected.y), 0, Config.TILE_COUNT - 1));
+                MathUtils.clamp(MathUtils.floor(unprojected.x) - 1, 0f, Config.TILE_COUNT - 1),
+                MathUtils.clamp(MathUtils.floor(unprojected.y) - 1, 0, Config.TILE_COUNT - 1));
     }
 }
