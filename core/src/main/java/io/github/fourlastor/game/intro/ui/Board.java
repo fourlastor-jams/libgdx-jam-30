@@ -24,9 +24,12 @@ import io.github.fourlastor.game.intro.ElementTextures;
 import io.github.fourlastor.game.intro.state.Element;
 import io.github.fourlastor.game.intro.state.ElementType;
 import io.github.fourlastor.game.intro.state.State;
+import io.github.fourlastor.game.intro.state.Tile;
 import io.github.fourlastor.perceptual.Perceptual;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Board extends WidgetGroup {
 
@@ -54,6 +57,7 @@ public class Board extends WidgetGroup {
     private final Sound clickSound;
     private final Sound abortSound;
     private final Listener listener;
+    private Map<GridPoint2, Tile> previousTiles = new HashMap<>();
 
     public Board(ElementTextures textures, TextureRegion tile, Sound clickSound, Sound abortSound, Listener listener) {
         this.textures = textures;
@@ -135,6 +139,10 @@ public class Board extends WidgetGroup {
             Image image = new Image(current.type().tileSelector.apply(textures));
             image.setPosition(position.x * TILE_SIZE, position.y * TILE_SIZE);
             image.setOrigin(Align.center);
+            if (!previousTiles.containsKey(position)) {
+                image.setScale(0);
+                image.addAction(Actions.scaleTo(1, 1, 0.2f));
+            }
             addActor(image);
             visibleTiles.add(image);
             if (state.fireLast().equals(position)) {
@@ -150,6 +158,7 @@ public class Board extends WidgetGroup {
                 airCurrent = image;
             }
         });
+        previousTiles = state.tiles();
         fireCurrent.addAction(highlightAction());
         waterCurrent.addAction(highlightAction());
         earthCurrent.addAction(highlightAction());
