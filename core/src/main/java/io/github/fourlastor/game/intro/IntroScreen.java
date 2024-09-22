@@ -87,7 +87,9 @@ public class IntroScreen extends ScreenAdapter {
                 atlas.findRegion("elements/air-tile"));
         TextureAtlas.AtlasRegion tile = atlas.findRegion("elements/tile");
         stateContainer = new StateContainer<>(generator.generateLevel());
-        Board board = new Board(elementTextures, tile, new Board.Listener() {
+        Sound clickSound = assetManager.get(AssetsModule.CLICK_PATH);
+        Sound abortSound = assetManager.get(AssetsModule.ABORT_PATH);
+        Board board = new Board(elementTextures, tile, clickSound, abortSound, new Board.Listener() {
             @Override
             public void onElementPlaced(ElementType type, GridPoint2 position) {
                 lastType = type;

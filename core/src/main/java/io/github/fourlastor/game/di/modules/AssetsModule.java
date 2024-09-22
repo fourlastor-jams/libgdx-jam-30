@@ -21,6 +21,8 @@ public class AssetsModule {
     public static final String AIR_PATH = "audio/sounds/air.ogg";
     public static final String DELETE_PATH = "audio/sounds/delete.ogg";
     public static final String CONNECT_PATH = "audio/sounds/connect.ogg";
+    public static final String CLICK_PATH = "audio/sounds/click.ogg";
+    public static final String ABORT_PATH = "audio/sounds/abort.ogg";
 
     @Provides
     @Singleton
@@ -33,6 +35,8 @@ public class AssetsModule {
         assetManager.load(AIR_PATH, Sound.class);
         assetManager.load(DELETE_PATH, Sound.class);
         assetManager.load(CONNECT_PATH, Sound.class);
+        assetManager.load(CLICK_PATH, Sound.class);
+        assetManager.load(ABORT_PATH, Sound.class);
         assetManager.finishLoading();
         return assetManager;
     }
