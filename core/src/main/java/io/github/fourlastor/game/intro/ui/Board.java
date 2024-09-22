@@ -338,10 +338,7 @@ public class Board extends WidgetGroup {
         public void exit(Board board) {
             for (Image preview : previews(board)) {
                 preview.removeListener(listener);
-                preview.addAction(Actions.sequence(
-                        Actions.fadeOut(0.4f),
-                        Actions.visible(false)
-                ));
+                preview.addAction(Actions.sequence(Actions.fadeOut(0.4f), Actions.visible(false)));
             }
             board.removeListener(cancelListener);
         }
