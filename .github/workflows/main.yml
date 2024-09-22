@@ -8,7 +8,7 @@ on:
 jobs:
   build:
     env:
-      ITCH_PROJECT: 'sandramoen/libgdx-jam-30'
+      ITCH_PROJECT: 'sandramoen/four-elements'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
