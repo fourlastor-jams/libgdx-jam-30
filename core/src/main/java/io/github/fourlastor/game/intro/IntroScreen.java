@@ -49,6 +49,10 @@ public class IntroScreen extends ScreenAdapter {
     private final Sound airSound;
     private int tilesCount = 0;
     private ElementType lastType = null;
+    private boolean fireConnected = false;
+    private boolean waterConnected = false;
+    private boolean earthConnected = false;
+    private boolean airConnected = false;
 
     @Inject
     public IntroScreen(
@@ -128,6 +132,7 @@ public class IntroScreen extends ScreenAdapter {
         earthSound = assetManager.get(AssetsModule.EARTH_PATH);
         airSound = assetManager.get(AssetsModule.AIR_PATH);
         Sound delete = assetManager.get(AssetsModule.DELETE_PATH);
+        Sound connect = assetManager.get(AssetsModule.CONNECT_PATH);
         stateContainer.distinct(State::tiles).listen(state -> {
             int tilesSize = state.tiles().size();
             int difference = tilesSize - tilesCount;
@@ -145,6 +150,18 @@ public class IntroScreen extends ScreenAdapter {
                 delete.play();
             }
             tilesCount = tilesSize;
+        });
+        stateContainer.listen(it -> {
+            if ((it.fireComplete() && !fireConnected)
+                    || (it.waterComplete() && !waterConnected)
+                    || (it.earthComplete() && !earthConnected)
+                    || (it.airComplete() && !airConnected)) {
+                connect.play(Perceptual.perceptualToAmplitude(0.7f));
+            }
+            fireConnected = it.fireComplete();
+            waterConnected = it.waterComplete();
+            earthConnected = it.earthComplete();
+            airConnected = it.airComplete();
         });
     }
 
