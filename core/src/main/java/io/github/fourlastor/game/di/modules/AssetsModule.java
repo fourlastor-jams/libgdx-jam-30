@@ -1,7 +1,6 @@
 package io.github.fourlastor.game.di.modules;
 
 import com.badlogic.gdx.assets.AssetManager;
-import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.g2d.TextureAtlas;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -27,7 +26,6 @@ public class AssetsModule {
     public AssetManager assetManager() {
         AssetManager assetManager = new AssetManager();
         assetManager.load(PATH_TEXTURE_ATLAS, TextureAtlas.class);
-        assetManager.load(MUSIC_PATH, Music.class);
         assetManager.load(FIRE_PATH, Sound.class);
         assetManager.load(WATER_PATH, Sound.class);
         assetManager.load(EARTH_PATH, Sound.class);
