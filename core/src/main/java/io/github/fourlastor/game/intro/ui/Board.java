@@ -30,6 +30,7 @@ import java.util.List;
 
 public class Board extends WidgetGroup {
 
+    private static final float PREVIEW_ALPHA = 0.5f;
     private final Image fireStart;
     private final Image fireEnd;
     private Image fireCurrent;
@@ -164,7 +165,7 @@ public class Board extends WidgetGroup {
             Image image = new Image(tile);
             image.setVisible(false);
             Color color = new Color(type.color);
-            color.a = 0.5f;
+            color.a = PREVIEW_ALPHA;
             image.setColor(color);
             image.setPosition(position.x * TILE_SIZE, position.y * TILE_SIZE);
             addActor(image);
@@ -301,6 +302,7 @@ public class Board extends WidgetGroup {
             };
             for (Image preview : previews(board)) {
                 preview.setVisible(true);
+                preview.getColor().a = PREVIEW_ALPHA;
                 preview.addListener(listener);
             }
             cancelListener = new ClickListener(Input.Buttons.RIGHT) {
@@ -335,8 +337,8 @@ public class Board extends WidgetGroup {
         @Override
         public void exit(Board board) {
             for (Image preview : previews(board)) {
-                preview.setVisible(false);
                 preview.removeListener(listener);
+                preview.addAction(Actions.sequence(Actions.fadeOut(0.4f), Actions.visible(false)));
             }
             board.removeListener(cancelListener);
         }
